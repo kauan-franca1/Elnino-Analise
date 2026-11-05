@@ -1,441 +1,1040 @@
-<!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="utf-8">
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="El Niño de 2026 e os cinco grandes rios do Brasil: gráficos interativos, teste de estresse dos reservatórios e missões de exponencial e logaritmo.">
 <title>El Niño × Rios do Brasil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
-:root{--bg:#fbfbfd;--card:#fff;--ink:#1d1d1f;--mut:#6e6e73;--line:#e5e5ea;--red:#d1495b;--blue:#0a84ff;--grn:#248a3d;--amb:#b25e00;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--card:#1c1c1e;--ink:#f5f5f7;--mut:#a1a1a6;--line:#38383a;--red:#ff6b7d;--blue:#64a8ff;--grn:#30d158;--amb:#ffb340}}
-:root[data-theme="dark"]{--bg:#000;--card:#1c1c1e;--ink:#f5f5f7;--mut:#a1a1a6;--line:#38383a;--red:#ff6b7d;--blue:#64a8ff;--grn:#30d158;--amb:#ffb340}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+/* Layout: caderno de papel quente. Canvas morno, cartões brancos com fio fino, um único azul
+   para a ação principal e cores de destaque pintando blocos inteiros, como notas adesivas.
+   Gráficos interativos dentro de painéis "de produto". Tema único claro, por escolha. */
+:root{
+  --canvas:#f6f5f4; --card:#ffffff; --ink:#000000; --ink-95:rgba(0,0,0,.95); --body:#615d59; --mut:#6b6763; --mut-2:#8a8680;
+  --drought:#9a6a4c; --drought-bg:#f3e6dc; --drought-ink:#7a4a2a; --range:#4b97dc; --blue-ink:#0062b8;
+  --line:rgba(0,0,0,.08); --line-2:rgba(0,0,0,.14); --well:#efedeb;
+  --blue:#0075de; --sky-tint:#e6f3fe; --sky:#62aef0; --signal:#097fe8;
+  --marigold:#ffb110; --coral:#f64932; --midnight:#02093a; --peach:#f6d5b8;
+  --s2026:#f64932; --s2023:#097fe8; --s2015:#d18a00; --s1997:#7b5cd6; --s1982:#2f9e6f;
+  --good:#18753f; --bad:#c4321f;
+  --f-sans:"Inter",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --f-serif:"Source Serif 4","Source Serif Pro",Georgia,"Times New Roman",serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r-card:12px; --r-btn:8px; --r-sm:4px; --r-pill:9999px;
+  color-scheme:light;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-main{max-width:980px;margin:0 auto;padding:0 22px 80px}
-.hero{padding:72px 0 40px;text-align:center}
-.eyebrow{color:var(--red);font-weight:600;font-size:15px;letter-spacing:.02em}
-h1{font-size:clamp(40px,8vw,76px);line-height:1.04;letter-spacing:-.03em;margin:10px 0 16px;font-weight:700}
-.sub{color:var(--mut);font-size:clamp(18px,2.6vw,24px);max-width:680px;margin:0 auto}
-.big{font-size:clamp(64px,14vw,132px);font-weight:700;letter-spacing:-.04em;line-height:1;margin:34px 0 4px;color:var(--red)}
-.cap{color:var(--mut);font-size:15px}
-h2{font-size:clamp(28px,5vw,44px);letter-spacing:-.02em;margin:72px 0 8px;line-height:1.1}
-p.lead{color:var(--mut);margin:0 0 24px;max-width:720px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px}
-.chart svg{width:100%;height:auto;display:block}
-.leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--mut);margin-top:10px}
-.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
-.peaks{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
-.peak{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
-.peak b{font-size:30px;letter-spacing:-.02em;display:block}
-.peak span{color:var(--mut);font-size:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
-.rv h3{margin:0 0 2px;font-size:22px;letter-spacing:-.01em}
-.rv .reg{color:var(--mut);font-size:14px;margin-bottom:12px}
-.tag{display:inline-block;font-size:13px;font-weight:600;padding:3px 11px;border-radius:99px;margin:0 6px 12px 0;border:1px solid var(--line)}
-.dn{color:var(--amb)}.up{color:var(--blue)}.na{color:var(--mut)}
-.rv ul{margin:0;padding-left:18px;font-size:15px}.rv li{margin:6px 0}
-.rv .note{font-size:14px;color:var(--mut);margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
-.now{background:linear-gradient(135deg,color-mix(in srgb,var(--red) 14%,var(--card)),var(--card))}
-.now ul{margin:10px 0 0;padding-left:18px}.now li{margin:6px 0}
-.rs{display:grid;grid-template-columns:130px 1fr 46px;gap:6px 14px;align-items:center;font-size:15px}
-.rs .n b{display:block;line-height:1.2}.rs .n span{color:var(--mut);font-size:13px}
-.trk{position:relative;height:12px;border-radius:99px;background:var(--line)}
-.rng{position:absolute;top:0;bottom:0;border-radius:99px;background:color-mix(in srgb,var(--blue) 55%,transparent)}
-.cur{position:absolute;top:-4px;width:4px;height:20px;border-radius:2px;background:var(--red);margin-left:-2px}
-.rs .v{color:var(--mut);text-align:right;font-variant-numeric:tabular-nums}
-.rs .ax{grid-column:2;display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
-@media(max-width:520px){.rs{grid-template-columns:96px 1fr 40px}}
-.mis{margin-top:16px}
-.mis h3{font-size:clamp(22px,3.6vw,28px);margin:0 0 4px;letter-spacing:-.015em;line-height:1.2;text-wrap:balance}
-.mis .tagline{color:var(--mut);margin:0 0 14px;font-size:15px}
-.mis p{max-width:720px}
-ol.q,ul.q{margin:14px 0;padding-left:22px}.q li{margin:6px 0}
-.eq{font:600 16px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:color-mix(in srgb,var(--blue) 8%,var(--card));border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin:10px 0;overflow-x:auto;max-width:100%}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}.pair>div{min-width:0}
-@media(max-width:600px){.pair{grid-template-columns:1fr}}
-.sim{margin:16px 0 4px;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--bg)}
-.sim label{display:block;margin-bottom:8px;font-size:15px}
-input[type=range]{width:100%;accent-color:var(--blue)}
-.out{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:12px}
-.out>div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;min-width:0}
-.out b{display:block;font-size:24px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.out span{font-size:13px;color:var(--mut)}
-details{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
-summary{cursor:pointer;font-weight:600;color:var(--blue);border-radius:6px}
-summary:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.sol p{margin:10px 0;font-size:15px}
-.sol .lim{color:var(--mut);border-left:3px solid var(--line);padding-left:12px}
-.tw{overflow-x:auto;max-width:100%;margin-top:6px}
-table.t{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums;min-width:420px}
-table.t th,table.t td{text-align:left;padding:8px 12px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
-table.t th{color:var(--mut);font-weight:600;font-size:13px}
-table.t tr.hl td{color:var(--red);font-weight:700}
-.em{font-size:14px;line-height:1.5;color:var(--mut);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0 0 14px;max-width:720px}
-.em b{color:var(--ink)}
-.obj{border-color:color-mix(in srgb,var(--blue) 40%,var(--line))}
-.obj h3{margin:0 0 8px;font-size:22px;letter-spacing:-.01em}
-.obj ul{margin:10px 0 0;padding-left:20px;font-size:15px}.obj li{margin:5px 0}
-:root{--c-body:#2a2c31;--c-key:#454851;--c-keyt:#f5f5f7;--c-fn:#33363d;--c-lcd:#cfd8bf;--c-lcdt:#1d2415;--c-shift:#ffd25a;--c-eq:#0066d6}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:12px}
-.tile{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--bg);min-width:0}
-.tile b{display:block;margin-bottom:4px}.tile p{margin:0;font-size:15px}
-.tile.gl{padding:10px 14px}.tile.gl p{font-size:14px;color:var(--mut)}
-kbd{font:600 13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--c-fn);color:var(--c-keyt);border-radius:6px;padding:2px 7px;white-space:nowrap}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--canvas);color:var(--ink-95);font:400 16px/1.5 var(--f-sans);-webkit-font-smoothing:antialiased;font-feature-settings:"lnum"}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--card)}
+a{color:inherit}
+b,strong{font-weight:600;color:var(--ink)}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+section{padding-block:80px 0}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);box-shadow:0 .7px 1.46px rgba(0,0,0,.015),0 3px 9px rgba(0,0,0,.03)}
+.nav .wrap{display:flex;align-items:center;gap:8px;height:64px}
+.brand{font-weight:700;font-size:15px;letter-spacing:-.01em;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand i{width:22px;height:22px;border-radius:50%;border:2px solid var(--coral);display:inline-block;background:var(--marigold)}
+.nav-links{display:flex;gap:2px;margin:0 auto}
+.nav-links a{color:rgba(0,0,0,.54);text-decoration:none;font-weight:500;font-size:14px;padding:10px 14px;border-radius:var(--r-btn)}
+.nav-links a:hover{color:var(--ink);background:var(--well)}
+@media (max-width:860px){.nav-links{display:none}.nav .btn{margin-left:auto}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:var(--r-btn);padding:9px 16px;font:500 15px/1.2 var(--f-sans);text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn-pri{background:var(--blue);color:#fff}.btn-pri:hover{background:#005bb0}
+.btn-ghost{background:var(--sky-tint);color:var(--blue-ink)}.btn-ghost:hover{background:#d3e9fd}
+.btn-text{background:transparent;color:var(--ink-95)}.btn-text:hover{background:var(--well)}
+.btn-out{background:transparent;color:rgba(0,0,0,.9);border:1px solid rgba(0,0,0,.9);border-radius:var(--r-sm);padding:6px 11px;font:500 14px/1.2 var(--f-sans);cursor:pointer}
+.btn-out:hover{background:var(--ink);color:#fff}
+@media (prefers-reduced-motion:no-preference){.btn,.btn-out,.chip,.seg button,.side button,.nav-links a{transition:background .2s ease,color .2s ease,opacity .2s ease}}
+:where(a,button,summary,input,select,[tabindex]):focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* type */
+.eyebrow{font:600 12px/1.33 var(--f-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+h1{font:600 clamp(38px,6vw,72px)/1.04 var(--f-sans);letter-spacing:-.042em;margin:10px 0 14px;color:var(--ink);text-wrap:balance}
+.hl{display:inline-block;background:var(--marigold);border-radius:var(--r-pill);padding:0 .28em .04em;line-height:1.08}
+h2{font:600 clamp(34px,5vw,54px)/1.04 var(--f-sans);letter-spacing:-.035em;margin:0 0 14px;color:var(--ink);text-wrap:balance}
+h3{font:700 22px/1.27 var(--f-sans);letter-spacing:-.011em;margin:0 0 6px;color:var(--ink);text-wrap:balance}
+.serif{font:400 clamp(18px,1.7vw,20px)/1.56 var(--f-serif);color:var(--body);max-width:62ch;margin:0}
+.sec-head{display:grid;gap:4px;margin-bottom:32px}
+.cap{font-size:14px;line-height:1.43;color:var(--mut)}
+p{margin:0 0 12px}
+
+/* hero */
+.hero{padding-block:36px 0;text-align:center}
+.marks{display:flex;justify-content:center;gap:8px}
+.mark{width:40px;height:40px;border-radius:50%;background:var(--card);border:2px solid var(--c);display:grid;place-items:center}
+.mark svg{width:21px;height:21px}
+.act{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.act b{font:600 12px/1 var(--f-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-pill);padding:6px 10px;white-space:nowrap}
+.act span{font:600 12px/1.33 var(--f-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.act::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.chart-title{font:600 clamp(18px,2vw,22px)/1.27 var(--f-sans);letter-spacing:-.015em;color:var(--ink);margin:0;text-wrap:balance}
+@media (prefers-reduced-motion:no-preference){.mark{animation:bob 3.2s cubic-bezier(.34,1.56,.64,1) infinite;animation-delay:calc(var(--i)*.18s)}.mark:hover{transform:scale(1.15) rotate(-8deg);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}}
+@keyframes bob{0%,80%,100%{translate:0 0}88%{translate:0 -6px}}
+.hero .serif{margin:0 auto 26px;text-align:center}
+.ctas{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* panels and cards */
+.panel{background:var(--card);border-radius:var(--r-card);box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid var(--line);text-align:left;min-width:0}
+.panel-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line)}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--well);display:block}
+.panel-body{padding:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px;min-width:0}
+.acc{border-radius:var(--r-card);padding:24px;min-width:0}
+.acc.marigold{background:var(--marigold);color:#000}.acc.coral{background:var(--coral);color:#000}.acc.sky{background:var(--sky);color:#000}.acc.night{background:var(--midnight);color:#fff}
+.acc.night b,.acc.night h3,.acc.night h2{color:#fff}
+.acc p{color:inherit}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;margin-bottom:18px}
+.kpi{background:var(--card);padding:14px 16px;min-width:0}
+.kpi .k{font-size:12px;line-height:1.33;color:var(--mut);letter-spacing:.01em}
+.kpi .v{font:600 clamp(22px,2.6vw,30px)/1.1 var(--f-sans);letter-spacing:-.03em;color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi .v.hot{color:#d93a24;font-size:clamp(34px,4.4vw,48px);letter-spacing:-.04em}
+@media (max-width:720px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi:first-child{grid-column:1/-1}}
+
+/* chips, segmented */
+.ctrl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;min-height:36px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-95);border-radius:var(--r-pill);padding:6px 14px;font:500 13px/1.2 var(--f-sans);cursor:pointer}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--c);border:2px solid var(--c)}
+.chip[aria-pressed=false]{background:var(--canvas);color:var(--mut)}
+.chip[aria-pressed=false] i{background:transparent}
+.chip .n{color:var(--mut);font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;background:var(--well);border-radius:var(--r-btn);padding:3px;gap:2px;max-width:100%;overflow-x:auto}
+.seg button{border:0;background:transparent;border-radius:6px;padding:6px 12px;min-height:32px;white-space:nowrap;flex:none;font:500 13px/1.2 var(--f-sans);color:var(--body);cursor:pointer}
+@media (max-width:560px){.seg{flex-wrap:wrap;overflow:visible}}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+
+/* charts */
+.plot{position:relative;min-width:0}
+.plot svg{display:block;width:100%;height:auto;touch-action:pan-y;font-family:var(--f-sans)}
+.plot svg:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:6px}
+.plot .grid{stroke:rgba(0,0,0,.07);stroke-width:1}
+.plot .grid.zero{stroke:rgba(0,0,0,.3)}
+.plot .ax{font-size:12px;fill:var(--mut);font-variant-numeric:tabular-nums}
+.plot .ref{stroke:var(--mut-2);stroke-width:1;stroke-dasharray:4 4}
+.plot .refl{font-size:11.5px;fill:var(--mut);font-weight:500}
+.plot .dl{font-size:12.5px;fill:var(--body);font-weight:500}
+.plot .dl.b{fill:var(--ink);font-weight:700}
+.plot .mk{font-size:12px;fill:var(--ink);font-weight:600}
+.plot .an{font-size:12px;fill:var(--ink);font-weight:600}
+.plot .an2{font-size:11.5px;fill:var(--mut)}
+.plot .bk{stroke:var(--ink);stroke-width:1.5;fill:none}
+.plot .cross{stroke:rgba(0,0,0,.35);stroke-width:1}
+.plot .area{opacity:.12}
+.tip{position:absolute;top:6px;background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-btn);box-shadow:0 4px 12px rgba(0,0,0,.1);padding:8px 10px;font-size:13px;line-height:1.35;pointer-events:none;min-width:150px;z-index:3}
+.tip .th{font-weight:600;color:var(--ink);margin-bottom:4px}
+.tip .tr{display:flex;align-items:center;gap:8px;justify-content:space-between;font-variant-numeric:tabular-nums}
+.tip .tr span:first-child{display:inline-flex;align-items:center;gap:6px;color:var(--body)}
+.tip .tr i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.tip .tr b{font-weight:600}
+.chart-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;margin-top:10px}
+details.tbl summary{cursor:pointer;font-size:14px;font-weight:500;color:var(--body)}
+.tw{overflow-x:auto;max-width:100%;margin-top:10px;border:1px solid var(--line);border-radius:var(--r-btn)}
+table.t{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;min-width:440px;background:var(--card)}
+table.t th,table.t td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t tr:last-child td{border-bottom:0}
+table.t th{font-weight:500;font-size:12px;color:var(--mut);background:var(--canvas)}
+table.t tr.hl td{font-weight:600;color:var(--ink);background:#fff4ea}
+
+/* rivers */
+.rivers{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.rivers .rv{grid-column:span 2}
+.rivers .rv:nth-child(4),.rivers .rv:nth-child(5),.rivers.f .rv{grid-column:span 3}
+@media (max-width:980px){.rivers{grid-template-columns:repeat(2,minmax(0,1fr))}.rivers .rv,.rivers .rv:nth-child(4),.rivers .rv:nth-child(5),.rivers.f .rv{grid-column:span 1}.rivers:not(.f) .rv:last-child{grid-column:1/-1}}
+@media (max-width:620px){.rivers{grid-template-columns:minmax(0,1fr)}.rivers .rv{grid-column:1/-1!important}}
+.rv{display:flex;flex-direction:column;gap:12px}
+.rv-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.rv .reg{font-size:14px;color:var(--mut)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:var(--r-pill);padding:4px 12px;font:500 12px/1.3 var(--f-sans);white-space:nowrap}
+.pill.dn{background:var(--drought-bg);color:var(--drought-ink)}
+.strip{margin-bottom:16px;padding:18px 20px 14px}
+.strip-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;margin-bottom:6px}
+.strip-top b{font-size:15px}
+.scale{position:relative;height:96px;margin:0 10px}
+.scale .bar{position:absolute;left:0;right:0;top:46px;height:6px;border-radius:3px;background:var(--well)}
+.scale .mid{position:absolute;left:50%;top:38px;width:1px;height:22px;background:var(--mut-2)}
+.scale button{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:transparent;cursor:pointer;padding:0 4px;font:600 13px/1.2 var(--f-sans);color:var(--ink);white-space:nowrap}
+.scale button i{width:16px;height:16px;border-radius:50%;background:var(--card);border:3px solid var(--c);margin-top:34px;order:2}
+.scale button span{order:1;position:absolute;top:0}
+.scale button:nth-child(even) span{top:68px}
+.scale button:hover i,.scale button:focus-visible i{transform:scale(1.25)}
+.scale-ax{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-top:4px}
+.legend-sig{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut)}.pill.up{background:var(--sky-tint);color:#0060b6}.pill.na{background:var(--well);color:var(--body)}
+.sig{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--body)}
+.sig .m{display:flex;gap:3px}.sig .m i{width:16px;height:6px;border-radius:3px;background:var(--well)}
+.sig .m i.on{background:var(--ink)}
+.rv ul{margin:0;padding-left:18px;font-size:15px;color:var(--body)}.rv li{margin:5px 0}
+.rv .note{font-size:14px;color:var(--body);background:var(--canvas);border-radius:var(--r-btn);padding:10px 12px}
+.rv .go{margin-top:auto;align-self:flex-start;padding:6px 10px;margin-left:-10px;font-size:14px}
+.rv[hidden]{display:none}
+.rv.hi{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+
+/* reservoirs */
+.res-wrap{background:var(--sky);border-radius:var(--r-card);padding:clamp(16px,3vw,32px)}
+.res-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:stretch}
+@media (max-width:960px){.res-grid{grid-template-columns:minmax(0,1fr)}}
+.sim-ctl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 24px;margin-bottom:18px;align-items:end}
+.sim-ctl.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:760px){.sim-ctl,.sim-ctl.even{grid-template-columns:minmax(0,1fr)}}
+.detail{display:flex;flex-direction:column}
+.detail .sum{margin-top:auto}
+.field label,.field .lab{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:500;color:var(--body);margin-bottom:6px}
+.field output{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--blue);margin:4px 0}
+.rrow{display:grid;grid-template-columns:132px minmax(0,1fr) 92px;gap:14px;align-items:center;width:100%;border:0;background:transparent;text-align:left;padding:10px 8px;border-radius:var(--r-btn);cursor:pointer;font:inherit;color:inherit}
+.rrow:hover{background:var(--canvas)}
+.rrow[aria-pressed=true]{background:var(--sky-tint)}
+.rrow .n b{display:block;font-size:15px;line-height:1.2}.rrow .n span{font-size:12px;color:var(--mut)}
+.trk{position:relative;height:28px}
+.trk::before{content:"";position:absolute;left:0;right:0;top:13px;height:2px;background:var(--well);border-radius:2px}
+.trk .rng{position:absolute;top:10px;height:8px;border-radius:var(--r-pill);background:var(--range)}
+.trk .cur,.trk .prj{position:absolute;top:5px;width:18px;height:18px;margin-left:-9px;border-radius:50%}
+.trk .cur{background:var(--midnight);border:2px solid var(--card)}
+.trk .prj{background:var(--card);border:3px solid var(--drought)}
+.trk .lnk{position:absolute;top:13px;height:2px;background:var(--drought);opacity:.6}
+@media (prefers-reduced-motion:no-preference){.trk .prj{transition:left .25s ease}}
+.rrow .v{text-align:right;font-variant-numeric:tabular-nums;font-size:14px;color:var(--body)}
+.rrow .v b{display:block;font-size:17px}
+.rrow .v .p{color:var(--drought-ink);font-weight:600}
+.axis{display:grid;grid-template-columns:132px minmax(0,1fr) 92px;gap:14px;padding:0 8px;font-size:12px;color:var(--mut)}
+.axis div{display:flex;justify-content:space-between}
+@media (max-width:560px){.rrow{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px}.rrow .trk{grid-column:1/-1;order:3}.rrow .n span{display:inline;margin-left:6px}.rrow .n b{display:inline}.rrow .v{display:flex;gap:8px;align-items:baseline}.rrow .v b{display:inline}.axis{grid-template-columns:minmax(0,1fr)}.axis>span{display:none}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--body);margin-top:12px;padding:0 8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-r{width:22px;height:8px;border-radius:9px;background:var(--range)}.lg-c{width:12px;height:12px;border-radius:50%;background:var(--midnight)}.lg-p{width:12px;height:12px;border-radius:50%;border:3px solid var(--drought)}
+.sum{font-size:15px;color:var(--body);background:var(--canvas);border-radius:var(--r-btn);padding:12px 14px;margin-top:14px}
+.detail h3{margin-bottom:2px}
+.dstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.dstats div{background:var(--canvas);border-radius:var(--r-btn);padding:10px}
+.dstats span{display:block;font-size:12px;color:var(--mut)}
+.dstats b{font-size:20px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* workspace */
+.ws{display:grid;grid-template-columns:240px minmax(0,1fr);gap:0;min-height:560px}
+.side{border-right:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:2px;background:#fbfbfa;border-radius:var(--r-card) 0 0 var(--r-card)}
+.side .sl{font-size:12px;color:var(--mut);padding:8px 10px 4px;font-weight:500}
+.side button{display:flex;align-items:center;gap:10px;border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:6px;font:500 14px/1.3 var(--f-sans);color:var(--body);cursor:pointer}
+.side button:hover{background:var(--well)}
+.side button[aria-selected=true]{background:var(--well);color:var(--ink);font-weight:600}
+.side button i{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--c);display:grid;place-items:center;font:700 11px/1 var(--f-sans);font-style:normal;color:var(--ink);background:var(--card)}
+.side .prog{margin-top:auto;padding:12px 10px 4px;font-size:12px;color:var(--mut)}
+.side .bar{height:6px;border-radius:3px;background:var(--well);margin-top:6px;overflow:hidden}
+.side .bar i{display:block;height:100%;background:var(--good);width:0}
+@media (prefers-reduced-motion:no-preference){.side .bar i{transition:width .3s ease}}
+.pane{padding:clamp(18px,3vw,36px);min-width:0}
+.pane[hidden]{display:none}
+@media (max-width:1024px){.ws{grid-template-columns:minmax(0,1fr)}.side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);border-radius:var(--r-card) var(--r-card) 0 0}.side .sl,.side .prog{display:none}.side button{white-space:nowrap;flex:none}}
+.crumb{font-size:13px;color:var(--mut);margin-bottom:6px}
+.pane h3.big{font:600 clamp(26px,3.2vw,36px)/1.1 var(--f-sans);letter-spacing:-.03em;margin:0 0 10px}
+.pane .serif{margin-bottom:18px}
+.pane p,.pane li{color:var(--body);max-width:70ch}
+.callout{display:block;background:var(--canvas);border-left:0;border-radius:var(--r-btn);padding:12px 14px;font-size:14px;color:var(--body);margin:14px 0;max-width:76ch}
+.callout.warn{background:#fff4e0}
+ol.q,ul.q{margin:12px 0;padding-left:22px}.q li{margin:6px 0}
+.formula{display:inline-block;font:500 15px/1.4 var(--f-mono);background:var(--canvas);border:1px solid var(--line);border-radius:var(--r-sm);padding:2px 8px;white-space:nowrap;color:var(--ink)}
+.two{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start;margin:16px 0}
+@media (max-width:1180px){.two{grid-template-columns:minmax(0,1fr)}}
+.outs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.outs div{background:var(--canvas);border-radius:var(--r-btn);padding:10px 12px;min-width:0}
+.outs b{display:block;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+.outs span{font-size:12px;color:var(--mut)}
+.box{border:1px solid var(--line);border-radius:var(--r-card);padding:16px;background:var(--card);min-width:0}
+.box h4{margin:0 0 10px;font-size:14px;font-weight:600;color:var(--ink)}
+
+.checks{display:grid;gap:8px}
+.check{display:grid;grid-template-columns:minmax(0,1fr) 120px auto;gap:6px 8px;align-items:center;font-size:14px}
+.check label{color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.check input{width:100%;font:500 15px/1.2 var(--f-sans);padding:7px 9px;border:1px solid var(--line-2);border-radius:6px;background:var(--card);color:var(--ink);font-variant-numeric:tabular-nums}
+.check .fb{grid-column:1/-1;font-size:13px;min-height:0}
+.check .fb:empty{display:none}
+.check.ok input{border-color:var(--good)}.check.ok .fb{color:var(--good)}
+.check.no input{border-color:var(--bad)}.check.no .fb{color:var(--bad)}
+@media (max-width:480px){.check{grid-template-columns:minmax(0,1fr) auto}.check label{grid-column:1/-1;white-space:normal}}
+details.sol{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+details.sol summary{cursor:pointer;font-weight:500;color:var(--blue);display:inline-block;padding:4px 0}
+.sol-b{margin-top:10px}
+.sol-b p{font-size:15px;margin:10px 0}
+.sol-b .lim{background:#fff4e0;border-radius:var(--r-btn);padding:10px 12px}
 .calc-tip{font-size:14px;color:var(--mut)}
-.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
-.tabs button,.ctl button{font:600 14px/1.2 inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:9px 15px;cursor:pointer}
-.tabs button[aria-selected=true],.ctl button.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.tabs button:focus-visible,.ctl button:focus-visible,.kb button:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.ctl{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.calc-wrap{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
-@media(max-width:720px){.calc-wrap{grid-template-columns:minmax(0,1fr)}}
-.calc{background:var(--c-body);border-radius:24px;padding:16px;max-width:340px;margin:0 auto;box-shadow:0 10px 30px rgba(0,0,0,.18)}
-.lcd{background:var(--c-lcd);color:var(--c-lcdt);border-radius:10px;padding:10px 12px;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;font:600 18px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-#cx{word-break:break-all;min-height:24px}#cr{text-align:right;font-size:28px;min-height:36px}
-.kb{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
-.kb button{position:relative;font:600 15px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;border:0;border-radius:10px;min-height:42px;padding:14px 0 6px;background:var(--c-key);color:var(--c-keyt);cursor:pointer}
-.kb button.fn{background:var(--c-fn);font-size:13px}
-.kb button small{position:absolute;top:3px;left:0;right:0;text-align:center;font-size:10px;font-weight:600;color:var(--c-shift)}
-.kb button.kEq{grid-column:1/-1;background:var(--c-eq)}
-.kb button.on{background:var(--c-shift);color:#1d1d1f}
-.kb button.nx{box-shadow:0 0 0 3px var(--c-shift)}
-@media(prefers-reduced-motion:no-preference){.kb button{transition:transform .12s,background .12s}.kb button.on{transform:scale(.92)}.kb button.nx{animation:pl 1.1s ease-in-out infinite}}
-@keyframes pl{0%,100%{box-shadow:0 0 0 2px var(--c-shift)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--c-shift) 35%,transparent)}}
-ol.steps{margin:0;padding:0;list-style:none;counter-reset:st}
-ol.steps li{counter-increment:st;padding:7px 10px 7px 38px;position:relative;font-size:15px;border-radius:10px;color:var(--mut)}
-ol.steps li::before{content:counter(st);position:absolute;left:8px;top:7px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);font-size:12px;font-weight:700;text-align:center;line-height:20px}
-ol.steps li.now{color:var(--ink);font-weight:700;background:color-mix(in srgb,var(--blue) 10%,var(--card))}
-ol.steps li.done{color:var(--mut)}
-ol.steps li.done::before{content:"✓";background:var(--ink);color:var(--bg);border-color:var(--ink)}
-footer{color:var(--mut);font-size:14px;margin-top:56px;border-top:1px solid var(--line);padding-top:20px}
-footer li{margin:4px 0}
-</style></head><body><main>
-<section class="hero">
-<div class="eyebrow">ENSO · Brasil · 2026</div>
-<h1>El Niño e os<br>grandes rios.</h1>
-<p class="sub">O que os registros históricos mostram em cada bacia, e o que o evento atual pode repetir.</p>
-<div class="big">+2,16 °C</div>
-<div class="cap">ONI em jul–set de 2026 (NOAA CPC) · ainda em alta</div>
+kbd{font:600 12px/1 var(--f-mono);background:var(--card);color:var(--ink);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:var(--r-sm);padding:2px 6px;white-space:nowrap}
+
+/* warm-up */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+@media (max-width:560px){.tiles{grid-template-columns:minmax(0,1fr)}}
+.tile{border:1px solid var(--line);border-radius:var(--r-card);padding:14px 16px;background:var(--card)}
+.tile>b{display:block;margin-bottom:2px}.tile p{margin:0;font-size:15px}
+.gloss{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+@media (max-width:720px){.gloss{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gloss div{border-radius:var(--r-card);padding:12px 14px;min-width:0}
+.gloss b{display:block;font-size:15px}.gloss p{margin:2px 0 0;font-size:13px;color:inherit;line-height:1.4}
+.big-out{font:600 clamp(28px,4vw,40px)/1.1 var(--f-sans);letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums;margin:8px 0 2px;overflow-wrap:anywhere}
+
+/* calculator */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 18px}
+.tabs button{border:1px solid var(--line-2);background:var(--card);border-radius:var(--r-pill);padding:6px 12px;font:500 13px/1.2 var(--f-sans);color:var(--body);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.calc-wrap{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.calc-wrap{grid-template-columns:minmax(0,1fr)}}
+.calc{background:var(--midnight);border-radius:var(--r-card);padding:14px;max-width:330px;margin:0 auto;width:100%;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.lcd{background:var(--sky-tint);color:var(--midnight);border-radius:var(--r-btn);padding:10px 12px;min-height:86px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;font:600 16px/1.3 var(--f-mono)}
+#cx{word-break:break-all;min-height:22px}#cr{text-align:right;font-size:26px;min-height:34px}
+.kb{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:12px}
+.kb button{position:relative;font:600 15px/1 var(--f-sans);border:0;border-radius:var(--r-btn);min-height:44px;padding:15px 0 6px;background:var(--card);color:var(--ink);cursor:pointer}
+.kb button.fn{background:#c9cde0;font-size:13px}
+.kb button small{position:absolute;top:4px;left:0;right:0;text-align:center;font-size:10px;font-weight:600;color:var(--body)}
+.kb button.kEq{grid-column:1/-1;background:var(--marigold);font-size:18px;padding:12px 0}
+.kb button.on{background:var(--marigold)}
+.kb button.nx{outline:3px solid var(--marigold);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){.kb button{transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s}.kb button.on{transform:scale(.9)}.kb button.nx{animation:pl 1.1s ease-in-out infinite}}
+@keyframes pl{0%,100%{outline-offset:1px}50%{outline-offset:5px}}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:st;display:grid;gap:2px}
+ol.steps li{counter-increment:st;padding:8px 10px 8px 40px;position:relative;font-size:15px;border-radius:6px;color:var(--mut)}
+ol.steps li::before{content:counter(st);position:absolute;left:8px;top:7px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line-2);font-size:12px;font-weight:600;text-align:center;line-height:20px;background:var(--card);color:var(--ink)}
+ol.steps li.now{color:var(--ink);font-weight:600;background:var(--sky-tint)}
+ol.steps li.done::before{content:"✓";background:var(--ink);color:#fff;border-color:var(--ink)}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.goal{font-weight:600;font-size:18px;letter-spacing:-.01em;color:var(--ink);margin:0 0 4px}
+
+/* beta bar */
+.mult{height:16px;border-radius:var(--r-pill);background:var(--well);position:relative;margin:14px 0 6px;overflow:hidden}
+.mult i{position:absolute;top:0;bottom:0;border-radius:var(--r-pill)}
+.mult .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+
+/* forecast */
+.fc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.fc>.night{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 40px;align-items:center;padding:clamp(24px,4vw,44px)}
+.fc .n95{font:600 clamp(72px,11vw,140px)/.9 var(--f-sans);letter-spacing:-.06em;color:var(--marigold);font-variant-numeric:tabular-nums}
+.fc .night p{font:400 clamp(18px,2vw,24px)/1.4 var(--f-serif);margin:0;color:#fff;max-width:36ch}
+.fc .night .cap{color:rgba(255,255,255,.75);font-family:var(--f-sans);font-size:14px;margin-top:10px}
+.fc>.card{display:flex;flex-direction:column;gap:6px}
+.fc .reg-tag{display:inline-flex;align-items:center;gap:8px;font:600 12px/1 var(--f-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.fc .reg-tag i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.fc h3{margin:4px 0 2px}
+.fc .card p{font-size:15px;margin:0;color:var(--body)}
+@media (max-width:960px){.fc{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.fc{grid-template-columns:minmax(0,1fr)}.fc>.night{grid-template-columns:minmax(0,1fr)}}
+
+footer{margin-top:80px;border-top:1px solid var(--line);padding-block:40px 64px;font-size:14px;color:var(--body)}
+footer h2{font-size:22px;letter-spacing:-.011em;margin-bottom:8px}
+footer ul{margin:10px 0 0;padding-left:18px;max-width:100ch}footer li{margin:4px 0}
+</style>
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<nav class="nav" aria-label="Seções">
+  <div class="wrap">
+    <a class="brand" href="#topo"><i aria-hidden="true"></i>El Niño × Rios</a>
+    <div class="nav-links">
+      <a href="#oni">ONI</a><a href="#rios">Rios</a><a href="#reservatorios">Reservatórios</a><a href="#missoes">Missões</a><a href="#previsao">Previsão</a>
+    </div>
+    <a class="btn btn-ghost" href="#tutorial">Calculadora</a>
+  </div>
+</nav>
+
+<main>
+<!-- HERO -->
+<header class="hero" id="topo">
+  <div class="wrap">
+    <div class="marks" aria-hidden="true">
+      <span class="mark" style="--c:var(--marigold);--i:0"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#ffb110"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M5.3 18.7l1.5-1.5M17.2 6.8l1.5-1.5"/></svg></span>
+      <span class="mark" style="--c:var(--signal);--i:1"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11Z" fill="#62aef0"/></svg></span>
+      <span class="mark" style="--c:var(--coral);--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"><rect x="9.5" y="3" width="5" height="12" rx="2.5"/><circle cx="12" cy="17.5" r="3.5" fill="#f64932"/><path d="M12 9v6"/></svg></span>
+      <span class="mark" style="--c:var(--sky);--i:3"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"><path d="M3 9c2.2-2.4 3.8-2.4 6 0s3.8 2.4 6 0 3.8-2.4 6 0M3 15c2.2-2.4 3.8-2.4 6 0s3.8 2.4 6 0 3.8-2.4 6 0"/></svg></span>
+      <span class="mark" style="--c:var(--signal);--i:4"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.4 1.5A3.3 3.3 0 0 0 7 15Z" fill="#e6f3fe"/><path d="M8 18.5l-1 2M12 18.5l-1 2M16 18.5l-1 2"/></svg></span>
+    </div>
+    <div class="eyebrow" style="margin-top:22px">ENSO · Brasil · 2026</div>
+    <h1>Quando o Pacífico esquenta, os rios <span class="hl">respondem</span>.</h1>
+    <p class="serif">O El Niño de 2026 já chegou a +2,16 °C. Veja o que os registros mostram em cada bacia e o que ele pode repetir.</p>
+    <div class="ctas"><a class="btn btn-pri" href="#oni">Explorar os dados</a><a class="btn btn-ghost" href="#missoes">Abrir as missões</a></div>
+  </div>
+
+  <!-- ONI -->
+  <section id="oni" style="padding-top:44px">
+    <div class="wrap">
+      <div class="act" style="text-align:left"><b>Ato 1</b><span>O sinal no Pacífico</span></div>
+      <div class="panel">
+        <div class="panel-bar">
+          <h2 class="chart-title">Em agosto, 2026 já está acima de todos os El Niños fortes recentes no mesmo mês.</h2>
+          <span class="cap">ONI · NOAA CPC</span>
+        </div>
+        <div class="panel-body">
+          <div class="kpis">
+            <div class="kpi"><div class="k">ONI jul–set 2026</div><div class="v hot">+2,16 °C</div><div class="k">e ainda subindo</div></div>
+            <div class="kpi"><div class="k">Acima da média de 1982, 1997, 2015 e 2023 no mesmo trimestre</div><div class="v">+0,72 °C</div></div>
+            <div class="kpi"><div class="k">Falta para o recorde de 2015–16 (+2,59)</div><div class="v">0,43 °C</div></div>
+          </div>
+          <div class="ctrl">
+            <div class="chips" id="oni-chips" role="group" aria-label="Mostrar ou ocultar eventos"></div>
+          </div>
+          <div class="plot" id="oni-plot"></div>
+          <div class="chart-foot">
+            <span class="cap">ONI em °C por mês central do trimestre. Passe o cursor, toque ou use ← → no gráfico. Tracejado: limiar de El Niño (+0,5 °C).</span>
+            <details class="tbl"><summary>Ver como tabela</summary>
+              <div class="tw"><table class="t" id="oni-tbl"></table></div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</header>
+
+<!-- RIOS -->
+<section id="rios">
+  <div class="wrap">
+    <div class="act"><b>Ato 2</b><span>O efeito nos rios</span></div>
+    <div class="sec-head">
+      <span class="eyebrow">Registros por bacia</span>
+      <h2>Cinco rios, cinco respostas.</h2>
+      <p class="serif">Recordes e episódios publicados por SGB, ANA, Embrapa e artigos científicos, em estações-chave. Não são correlações calculadas aqui.</p>
+    </div>
+    <div class="card strip">
+      <div class="strip-top"><b>Em anos de El Niño, o Norte tende a secar e o Sul a encher</b><span class="cap">Posição qualitativa, pela força do sinal nos registros. Toque num rio.</span></div>
+      <div class="scale" id="scale">
+        <div class="bar" aria-hidden="true"></div><div class="mid" aria-hidden="true"></div>
+      </div>
+      <div class="scale-ax"><span>← Mais seca</span><span>Sinal fraco</span><span>Mais cheia →</span></div>
+    </div>
+    <div class="ctrl" style="justify-content:space-between"><div class="chips" id="rv-filter" role="group" aria-label="Filtrar rios por resposta">
+      <button type="button" class="chip" data-f="all" aria-pressed="true">Todos <span class="n">5</span></button>
+      <button type="button" class="chip" data-f="dn" aria-pressed="false">Seca <span class="n">2</span></button>
+      <button type="button" class="chip" data-f="up" aria-pressed="false">Cheias <span class="n">2</span></button>
+      <button type="button" class="chip" data-f="na" aria-pressed="false">Inconclusivo <span class="n">1</span></button>
+    </div><div class="legend-sig"><span class="sig"><span class="m" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span></span>Força do sinal: de 1 (fraco) a 4 (muito forte)</div></div>
+    <div class="rivers" id="rivers">
+
+      <article class="card rv" data-t="dn">
+        <div><h3>Amazonas</h3><div class="reg">Norte · Rio Negro em Manaus</div></div>
+        <div class="rv-meta"><span class="pill dn">↓ Seca</span><div class="sig">Sinal forte<span class="m" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div></div>
+        <ul><li>Mínima histórica de <b>12,70 m</b> em 26/10/2023, com ONI entre +1,25 e +1,50.</li>
+        <li>Nova mínima de <b>12,26 m</b> em 12/10/2024. Os recordes anteriores eram 13,64 m (1963) e 13,63 m (2010).</li></ul>
+        <div class="note">Em out/2024 o ONI já estava neutro (−0,12). O recorde reflete o efeito atrasado e outros fatores, como o aquecimento do Atlântico.</div>
+        <button type="button" class="btn btn-text go" data-res="0">Ver Balbina →</button>
+      </article>
+
+      <article class="card rv" data-t="dn">
+        <div><h3>São Francisco</h3><div class="reg">Nordeste · Reservatório de Sobradinho</div></div>
+        <div class="rv-meta"><span class="pill dn">↓ Menos água</span><div class="sig">Sinal moderado<span class="m" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span></div></div>
+        <ul><li>O volume útil começou 2015 em <b>18,88%</b> e ficou abaixo de <b>1%</b> em dezembro.</li>
+        <li>A vazão mínima defluente caiu de 1.300 para 800 m³/s; chegou a ser autorizada até 700 m³/s.</li></ul>
+        <div class="note">A seca de 2015 vinha de 2012 e o rio é regulado por barragens. O El Niño agravou a crise, mas não a causou sozinho.</div>
+        <button type="button" class="btn btn-text go" data-res="1">Ver Sobradinho →</button>
+      </article>
+
+      <article class="card rv" data-t="na">
+        <div><h3>Paraguai</h3><div class="reg">Centro-Oeste · Régua de Ladário</div></div>
+        <div class="rv-meta"><span class="pill na">? Inconclusivo</span><div class="sig">Sinal fraco<span class="m" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></span></div></div>
+        <ul><li>Maior cheia: <b>6,64 m</b> em abr/1988, com ONI neutro (−0,03). Em abr/1982 também passou de 6,5 m, antes de o El Niño se firmar.</li>
+        <li>Em 2024 o rio chegou ao nível mais baixo da série em Ladário, com ONI neutro.</li></ul>
+        <div class="note">As cheias de 1982–83 e 1997–98 costumam ser atribuídas ao El Niño, mas os registros de Ladário não sustentam isso com clareza.</div>
+        <button type="button" class="btn btn-text go" data-res="2">Ver Manso →</button>
+      </article>
+
+      <article class="card rv" data-t="up">
+        <div><h3>Paraná</h3><div class="reg">Sudeste/Sul · Bacia do Prata</div></div>
+        <div class="rv-meta"><span class="pill up">↑ Cheias</span><div class="sig">Sinal forte, mas variável<span class="m" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div></div>
+        <ul><li>A pior cheia do século XX na seção argentina ocorreu no El Niño de <b>1983</b>.</li>
+        <li>Em 1997–98 a anomalia teve o mesmo sinal, porém bem menor.</li>
+        <li>O Paranaíba (Emborcação) teve vazão média anual recorde em 1983.</li></ul>
+        <div class="note">Estudos apontam que ciclos lentos do Atlântico decidem a magnitude.</div>
+        <button type="button" class="btn btn-text go" data-res="3">Ver Ilha Solteira →</button>
+      </article>
+
+      <article class="card rv" data-t="up">
+        <div><h3>Uruguai</h3><div class="reg">Sul · Uruguaiana (RS)</div></div>
+        <div class="rv-meta"><span class="pill up">↑ Cheias</span><div class="sig">Sinal muito forte<span class="m" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div></div>
+        <ul><li>Cota máxima de <b>13,58 m</b> em 19/07/1983; a cota de inundação é 8,5 m.</li>
+        <li>Em Porto Mauá, pico de 21,7 m no mesmo evento.</li>
+        <li>Out/2023: Uruguaiana a 9,87 m, acima da cota de inundação.</li></ul>
+        <div class="note">Estudo do SGB: quase metade das inundações ocorreu em fase de El Niño; as extremas, em El Niño e neutro.</div>
+        <button type="button" class="btn btn-text go" data-res="4">Ver Machadinho →</button>
+      </article>
+    </div>
+  </div>
 </section>
 
-<h2>2026 sobe mais rápido que os outros.</h2>
-<p class="lead">Trajetória do ONI de dez–fev a jul–set, para o evento atual e para quatro anos de El Niño forte.</p>
-<div class="card chart"><svg id="ch" viewBox="0 0 640 300" role="img" aria-label="Trajetória do ONI"></svg><div class="leg" id="lg"></div></div>
-<div class="peaks">
-<div class="peak"><b>+2,14</b><span>pico 1982–83</span></div>
-<div class="peak"><b>+2,37</b><span>pico 1997–98</span></div>
-<div class="peak"><b>+2,59</b><span>pico 2015–16</span></div>
-<div class="peak"><b>+1,99</b><span>pico 2023–24</span></div>
-<div class="peak" style="border-color:var(--red)"><b style="color:var(--red)">+2,16</b><span>2026, até jul–set</span></div>
-</div>
+<!-- RESERVATÓRIOS -->
+<section id="reservatorios">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Volume útil · ONS</span>
+      <h2>Os reservatórios, e um teste de estresse.</h2>
+      <p class="serif">Volume útil de jan/2022 a out/2026, lido do gráfico do ONS (erro de alguns pontos). Mova os meses sem chuva para ver até onde cada um cairia no ritmo das secas de 2015 e 2023–24.</p>
+    </div>
+    <div class="res-wrap">
+      <div class="res-grid">
+        <div class="card" style="padding:18px">
+          <div class="sim-ctl">
+            <div class="field"><label for="dm">Meses sem chuva <output id="dm-o" for="dm">3 meses</output></label><input type="range" id="dm" min="0" max="12" step="1" value="3"></div>
+            <div class="field"><span class="lab">Ritmo da queda (k por mês)</span>
+              <div class="seg" id="dk" role="group" aria-label="Ritmo da queda">
+                <button type="button" data-k="0.245" aria-pressed="true">Balbina 0,245</button>
+                <button type="button" data-k="0.267" aria-pressed="false">Sobradinho 0,267</button>
+                <button type="button" data-k="0.12" aria-pressed="false">Brando 0,12</button>
+              </div></div>
+          </div>
+          <div id="rrows"></div>
+          <div class="axis" aria-hidden="true"><span></span><div><span>0%</span><span>50%</span><span>100%</span></div><span></span></div>
+          <div class="legend"><span><i class="lg-r"></i>Mínima a máxima, 2022–2026</span><span><i class="lg-c"></i>Out/2026</span><span><i class="lg-p"></i>Projeção sem chuva</span></div>
+          <div class="sum" id="rsum" aria-live="polite"></div>
+        </div>
+        <div class="card detail" id="rdet" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>Cinco rios, cinco respostas.</h2>
-<p class="lead">Registros documentados por estação-chave. Não são correlações calculadas por mim: são recordes e episódios publicados por SGB, ANA, Embrapa e artigos científicos.</p>
-<div class="grid">
+<!-- MISSÕES -->
+<section id="missoes">
+  <div class="wrap">
+    <div class="act"><b>Ato 3</b><span>A investigação</span></div>
+    <div class="sec-head">
+      <span class="eyebrow">Cenário de investigação</span>
+      <h2>Seja cientista de rios.</h2>
+      <p class="serif">O El Niño muda a chuva, e a chuva muda a água que passa pelos rios e fica nos reservatórios. Com exponencial, logaritmo e uma calculadora científica dá para medir isso. Comece pelo aquecimento, depois resolva as missões e confira suas respostas.</p>
+    </div>
+    <div class="panel ws">
+      <div class="side" role="tablist" aria-label="Missões" aria-orientation="vertical" id="side">
+        <div class="sl">Preparação</div>
+        <button type="button" role="tab" data-p="aquecimento" style="--c:var(--marigold)"><i>A</i>Aquecimento</button>
+        <button type="button" role="tab" data-p="tutorial" style="--c:var(--sky)"><i>0</i>Calculadora</button>
+        <div class="sl">Missões</div>
+        <button type="button" role="tab" data-p="missao-1" style="--c:var(--signal)"><i>1</i>Régua e vazão</button>
+        <button type="button" role="tab" data-p="missao-2" style="--c:var(--coral)"><i>2</i>Reservatório e meia-vida</button>
+        <button type="button" role="tab" data-p="missao-3" style="--c:var(--s1997)"><i>3</i>Escala logarítmica</button>
+        <button type="button" role="tab" data-p="missao-4" style="--c:var(--s1982)"><i>4</i>Desafio β</button>
+        <div class="prog"><span id="prog-t">0 de 9 respostas certas</span><div class="bar"><i id="prog-b"></i></div></div>
+      </div>
 
-<article class="card rv"><h3>Amazonas</h3><div class="reg">Norte · Rio Negro em Manaus</div>
-<span class="tag dn">↓ Seca</span><span class="tag">Sinal forte</span>
-<ul><li>Mínima histórica de <b>12,70 m</b> em 26/10/2023, com ONI entre +1,25 e +1,50.</li>
-<li>Nova mínima de <b>12,26 m</b> em 12/10/2024. Os recordes anteriores eram 13,64 m (1963) e 13,63 m (2010).</li></ul>
-<div class="note">Balbina (ONS) caiu a ~11% em 2024 e a ~0% em 2025. Em out/2024 o ONI já estava neutro (−0,12). O recorde reflete o efeito atrasado e outros fatores, como o aquecimento do Atlântico.</div></article>
+      <!-- Aquecimento -->
+      <div class="pane" role="tabpanel" id="p-aquecimento">
+        <div class="crumb">Preparação / Aquecimento</div>
+        <h3 class="big">Quatro ideias antes de começar</h3>
+        <p class="serif">Objetivo: entender, com funções exponenciais e logarítmicas, como a água dos grandes rios muda em anos de El Niño, e saber até onde essas contas valem.</p>
+        <div class="tiles">
+          <div class="tile"><b>Potência</b><p>2³ = 2 × 2 × 2 = 8. O 3 é o <i>expoente</i>: quantas vezes o 2 se multiplica.</p></div>
+          <div class="tile"><b>Logaritmo</b><p>É o caminho de volta. "2 elevado a quanto dá 8?" Resposta: 3, então log₂ 8 = 3. O <b>log</b> da calculadora usa base 10.</p></div>
+          <div class="tile"><b>O número e e o ln</b><p>e vale cerca de 2,718. O <b>ln</b> é o logaritmo com base e. As teclas <b>eˣ</b> e <b>ln</b> se desfazem: ln(eˣ) = x.</p></div>
+          <div class="tile"><b>Crescer por multiplicação</b><p>Dobrar, triplicar, cair pela metade. Em um rio, +4 m de cota deixam a vazão 2 vezes maior.</p></div>
+        </div>
+        <div class="box" style="margin:16px 0">
+          <h4>Experimente: ida e volta</h4>
+          <div class="sim-ctl even" style="margin-bottom:6px">
+            <div class="field"><span class="lab">Base</span><div class="seg" id="wb" role="group" aria-label="Base"><button type="button" data-b="2" aria-pressed="true">2</button><button type="button" data-b="e" aria-pressed="false">e</button><button type="button" data-b="10" aria-pressed="false">10</button></div></div>
+            <div class="field"><label for="wx">Expoente x <output id="wx-o" for="wx">3</output></label><input type="range" id="wx" min="-3" max="5" step="0.1" value="3"></div>
+          </div>
+          <div class="big-out" id="w-pow">2³ = 8</div>
+          <div class="cap" id="w-log">De volta: log₂ 8 = 3</div>
+        </div>
+        <div class="gloss">
+          <div style="background:var(--marigold)"><b>Cota</b><p>Altura da água na régua do rio, em metros.</p></div>
+          <div style="background:var(--sky)"><b>Vazão</b><p>Volume de água que passa por segundo, em m³/s.</p></div>
+          <div style="background:var(--peach)"><b>Volume útil</b><p>Parte do reservatório que pode ser usada, em %.</p></div>
+          <div style="background:var(--midnight);color:#fff"><b style="color:#fff">ONI</b><p>Termômetro do El Niño: quanto o Pacífico está mais quente que o normal, em °C.</p></div>
+        </div>
+        <div class="ctas" style="justify-content:flex-start;margin-top:18px"><button type="button" class="btn btn-pri" data-goto="tutorial">Próximo: calculadora</button></div>
+      </div>
 
-<article class="card rv"><h3>São Francisco</h3><div class="reg">Nordeste · Reservatório de Sobradinho</div>
-<span class="tag dn">↓ Menos água</span><span class="tag">Sinal moderado</span>
-<ul><li>O volume útil começou 2015 em <b>18,88%</b> e ficou abaixo de <b>1%</b> em dezembro.</li>
-<li>A vazão mínima defluente caiu de 1.300 para 800 m³/s; chegou a ser autorizada até 700 m³/s.</li></ul>
-<div class="note">Em 2024 e 2025 Sobradinho não passou de ~41% de mínima (ONS). A seca de 2015 vinha de 2012 e o rio é regulado por barragens. O El Niño agravou, não causou sozinho.</div></article>
+      <!-- Tutorial -->
+      <div class="pane" role="tabpanel" id="p-tutorial" hidden>
+        <div class="crumb">Preparação / Calculadora</div>
+        <h3 class="big">Tutorial: calculadora científica</h3>
+        <p class="cap" style="margin-bottom:6px">Escolha uma lição e aperte a tecla que está piscando, ou veja a animação.</p>
+        <div class="tabs" id="ctabs" role="tablist" aria-label="Lições da calculadora"></div>
+        <div class="calc-wrap">
+          <div>
+            <div class="calc" id="calc" role="group" aria-label="Calculadora científica de demonstração">
+              <div class="lcd" aria-hidden="true"><div id="cx"></div><div id="cr"></div></div>
+              <div class="kb" id="kb"></div>
+            </div>
+          </div>
+          <div style="min-width:0">
+            <p class="goal" id="cgoal"></p>
+            <p class="cap" id="cnote" style="margin:0 0 12px"></p>
+            <ol class="steps" id="csteps" aria-live="polite"></ol>
+            <div class="ctl">
+              <button type="button" id="cplay" class="btn btn-pri">▶ Reproduzir</button>
+              <button type="button" id="cnext" class="btn btn-ghost">Próximo passo</button>
+              <button type="button" id="creset" class="btn btn-text">Reiniciar</button>
+            </div>
+            <p class="cap" id="chint" style="margin:10px 0 0" aria-live="polite">Aperte a tecla que está piscando.</p>
+          </div>
+        </div>
+        <p class="cap" style="margin:18px 0 0">A posição das teclas muda de modelo para modelo, mas os nomes são estes. Em calculadoras antigas, digite o número primeiro e depois aperte a tecla (por exemplo, 2 e depois ln).</p>
+      </div>
 
-<article class="card rv"><h3>Paraguai</h3><div class="reg">Centro-Oeste · Régua de Ladário</div>
-<span class="tag na">? Inconclusivo</span><span class="tag">Sinal fraco</span>
-<ul><li>Maior cheia: <b>6,64 m</b> em abr/1988, com ONI neutro (−0,03). Em abr/1982 também passou de 6,5 m, antes do El Niño se firmar.</li>
-<li>Em 2024 o rio chegou ao nível mais baixo da série em Ladário, com ONI neutro. O reservatório de Manso (MT) bateu ~35% no mesmo período.</li></ul>
-<div class="note">Correção: antes eu citei cheias em 1982–83 e 1997–98 como resposta ao El Niño. Os registros não sustentam isso com clareza.</div></article>
+      <!-- Missão 1 -->
+      <div class="pane" role="tabpanel" id="p-missao-1" hidden>
+        <div class="crumb">Missões / 1 · Rio Uruguai em Uruguaiana (RS)</div>
+        <h3 class="big">A régua do rio e a vazão</h3>
+        <div class="callout"><span><b>Ementa.</b> Função exponencial; logaritmo como o caminho de volta; o número e e o ln; quantas vezes a vazão muda por metro; tempo para dobrar; limites de um ajuste com dois pontos.</span></div>
+        <p>A régua mostra a altura da água (a <b>cota</b>, em metros). A <b>vazão</b> (m³/s) cresce por multiplicação quando a cota sobe. Dois registros reais do SGB: cota de 7,5 m ↔ 10.942 m³/s, e cota de 13,54 m ↔ 31.025 m³/s (julho de 1983, El Niño forte). A regra é <span class="formula">Q = 10.942 · e^(b·(h − 7,5))</span>.</p>
+        <div class="two">
+          <div class="box">
+            <h4>Curva cota → vazão · clique no gráfico para mover a régua</h4>
+            <div class="plot" id="m1-plot"></div>
+            <div class="field" style="margin-top:8px"><label for="hh">Cota em Uruguaiana <output id="o-h" for="hh">9,87 m</output></label><input type="range" id="hh" min="6" max="14" step="0.01" value="9.87"></div>
+            <div class="outs" aria-live="polite">
+              <div><b id="o-q">16.470</b><span>vazão (m³/s)</span></div>
+              <div><b id="o-r">1,51×</b><span>a vazão de 7,5 m</span></div>
+              <div><b id="o-d">0,59</b><span>vezes que a vazão dobrou</span></div>
+              <div><b id="o-s">Inundação</b><span>situação na régua</span></div>
+            </div>
+          </div>
+          <div class="box">
+            <h4>Confira suas respostas</h4>
+            <ol class="q" style="margin-top:0;padding-left:18px;font-size:15px">
+              <li>Qual é o valor de b?</li><li>Qual é a vazão com a cota em 9,87 m (out/2023)?</li><li>A vazão de 1983 (13,58 m) foi quantas vezes a de out/2023?</li><li>Em que cota a vazão é de 20.000 m³/s?</li>
+            </ol>
+            <div class="checks">
+              <div class="check"><label for="a1">1. b =</label><input id="a1" inputmode="decimal" autocomplete="off" data-ans="0.1725" data-tol="0.02"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+              <div class="check"><label for="a2">2. Q (m³/s) =</label><input id="a2" inputmode="decimal" autocomplete="off" data-ans="16470" data-tol="0.02"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+              <div class="check"><label for="a3">3. vezes =</label><input id="a3" inputmode="decimal" autocomplete="off" data-ans="1.9" data-tol="0.04"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+              <div class="check"><label for="a4">4. h (m) =</label><input id="a4" inputmode="decimal" autocomplete="off" data-ans="11.0" data-tol="0.015"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+            </div>
+          </div>
+        </div>
+        <details class="sol"><summary>Ver a solução</summary>
+        <div class="sol-b">
+          <p><b>1.</b> 31.025 = 10.942 · e<sup>b·6,04</sup>. Divida por 10.942: e<sup>b·6,04</sup> = 2,835. Aplique o <b>ln</b>, que desfaz o e: b · 6,04 = ln 2,835 = 1,042. Logo b = 1,042 ÷ 6,04 ≈ <b>0,1725</b>.</p>
+          <p class="calc-tip">Na calculadora: <kbd>ln</kbd> 31025 ÷ 10942 <kbd>)</kbd> ÷ 6,04 <kbd>=</kbd> (lição 5)</p>
+          <p>A cada metro, a vazão é multiplicada por e<sup>0,1725</sup> = 1,19, ou seja, cresce cerca de 19% (<kbd>SHIFT</kbd> <kbd>ln</kbd> 0,1725 <kbd>)</kbd> <kbd>=</kbd>, lição 4). Para dobrar: ln 2 ÷ 0,1725 ≈ <b>4,02 m</b>.</p>
+          <p><b>2.</b> 0,1725 · (9,87 − 7,5) = 0,409. Então e<sup>0,409</sup> = 1,505 e Q = 10.942 · 1,505 ≈ <b>16.470 m³/s</b>.</p>
+          <p><b>3.</b> A cota subiu 3,71 m. A vazão ficou multiplicada por e<sup>0,1725·3,71</sup> = e<sup>0,640</sup> ≈ <b>1,9</b>. Quase o dobro.</p>
+          <p><b>4.</b> 0,1725 · (h − 7,5) = ln(20.000 ÷ 10.942) = 0,603. Então h − 7,5 = 3,50 e <b>h ≈ 11,0 m</b>.</p>
+          <p class="lim">Cuidado: é um ajuste didático feito com só dois pontos. A regra serve entre 7,5 m e 13,5 m. Em 13,58 m ela dá 31.240 m³/s, contra 30.786 m³/s oficiais (diferença de 1,5%).</p>
+        </div></details>
+      </div>
 
-<article class="card rv"><h3>Paraná</h3><div class="reg">Sudeste/Sul · Bacia do Prata</div>
-<span class="tag up">↑ Cheias</span><span class="tag">Sinal forte, mas variável</span>
-<ul><li>A pior cheia do século XX na seção argentina ocorreu no El Niño de <b>1983</b>.</li>
-<li>Em 1997–98 a anomalia teve o mesmo sinal, porém bem menor.</li>
-<li>O Paranaíba (Emborcação) teve vazão média anual recorde em 1983.</li></ul>
-<div class="note">Estudos apontam que ciclos lentos do Atlântico decidem a magnitude.</div></article>
+      <!-- Missão 2 -->
+      <div class="pane" role="tabpanel" id="p-missao-2" hidden>
+        <div class="crumb">Missões / 2 · Sobradinho e Balbina</div>
+        <h3 class="big">Quanto tempo um reservatório aguenta</h3>
+        <div class="callout"><span><b>Ementa.</b> Queda exponencial; a constante k; meia-vida; equações exponenciais resolvidas com logaritmo; por que o ln não aceita zero; limites do modelo.</span></div>
+        <p>Sem chuva, o volume útil cai pela regra <span class="formula">V = V₀ · e^(−k·t)</span>, com t em meses. <b>Sobradinho, 2015:</b> de 18,88% em janeiro para menos de 1% em dezembro (11 meses). <b>Balbina, 2023–24:</b> de cerca de 100% em maio para cerca de 11% em fevereiro (9 meses).</p>
+        <div class="two">
+          <div class="box">
+            <div class="ctrl" style="justify-content:space-between"><h4 style="margin:0">Curva de queda</h4>
+              <div class="seg" id="m2-case" role="group" aria-label="Reservatório"><button type="button" data-c="b" aria-pressed="true">Balbina 2023–24</button><button type="button" data-c="s" aria-pressed="false">Sobradinho 2015</button></div></div>
+            <div class="plot" id="m2-plot"></div>
+            <div class="field" style="margin-top:8px"><label for="m2t">Meses sem chuva <output id="m2t-o" for="m2t">6</output></label><input type="range" id="m2t" min="0" max="20" step="0.1" value="6"></div>
+            <div class="outs" aria-live="polite">
+              <div><b id="m2-v">23,0%</b><span>volume útil</span></div>
+              <div><b id="m2-h">2,8 meses</b><span>meia-vida (ln 2 ÷ k)</span></div>
+            </div>
+          </div>
+          <div class="box">
+            <h4>Confira suas respostas</h4>
+            <ol class="q" style="margin-top:0;padding-left:18px;font-size:15px">
+              <li>k de Balbina: ln(V₀ ÷ V) ÷ t.</li><li>Meia-vida de Balbina: ln 2 ÷ k.</li><li>Meses para Balbina ir de 100% a 1%.</li><li>Por que o modelo nunca chega a 0%? (na solução)</li>
+            </ol>
+            <div class="checks">
+              <div class="check"><label for="b1">1. k =</label><input id="b1" inputmode="decimal" autocomplete="off" data-ans="0.245" data-tol="0.02"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+              <div class="check"><label for="b2">2. meia-vida =</label><input id="b2" inputmode="decimal" autocomplete="off" data-ans="2.83" data-tol="0.03"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+              <div class="check"><label for="b3">3. meses =</label><input id="b3" inputmode="decimal" autocomplete="off" data-ans="18.8" data-tol="0.02"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+            </div>
+            <div class="tw"><table class="t" style="min-width:0">
+              <thead><tr><th></th><th>k/mês</th><th>Meia-vida</th><th>Perde/mês</th></tr></thead>
+              <tbody><tr><td>Sobradinho</td><td>≥ 0,267</td><td>≤ 2,6 m</td><td>≥ 23%</td></tr><tr><td>Balbina</td><td>0,245</td><td>2,8 m</td><td>22%</td></tr></tbody></table></div>
+          </div>
+        </div>
+        <details class="sol"><summary>Ver a solução</summary>
+        <div class="sol-b">
+          <p><b>1.</b> Sobradinho: k = ln(18,88 ÷ 1) ÷ 11 = 2,938 ÷ 11 = 0,267 por mês ("pelo menos", porque ficou abaixo de 1%). Balbina: k = ln(100 ÷ 11) ÷ 9 = 2,207 ÷ 9 = <b>0,245</b> por mês.</p>
+          <p class="calc-tip">Na calculadora: <kbd>ln</kbd> 100 ÷ 11 <kbd>)</kbd> ÷ 9 <kbd>=</kbd></p>
+          <p><b>2.</b> Sobradinho: 0,693 ÷ 0,267 = 2,6 meses. Balbina: 0,693 ÷ 0,245 = <b>2,8 meses</b>. Em menos de 3 meses o reservatório perde metade do que tem.</p>
+          <p><b>3.</b> De 100% a 10%: ln 10 ÷ 0,245 = 9,4 meses. De 100% a 1%: ln 100 ÷ 0,245 = <b>18,8 meses</b>. Cada queda de 10 vezes leva o mesmo tempo.</p>
+          <p><b>4.</b> O ln só existe para números maiores que zero; ln 0 dá erro. A curva chega cada vez mais perto de 0 sem tocar. Balbina chegou a cerca de 0% no início de 2025, e esse ponto não entra na conta.</p>
+          <p class="lim">Cuidado: quando a água sai sempre na mesma quantidade, a queda real parece mais com uma reta. Use o k só para ter uma ideia da rapidez, não para prever.</p>
+        </div></details>
+      </div>
 
-<article class="card rv"><h3>Uruguai</h3><div class="reg">Sul · Uruguaiana (RS)</div>
-<span class="tag up">↑ Cheias</span><span class="tag">Sinal muito forte</span>
-<ul><li>Cota máxima de <b>13,58 m</b> em 19/07/1983; a cota de inundação é 8,5 m.</li>
-<li>Em Porto Mauá, pico de 21,7 m no mesmo evento.</li>
-<li>Out/2023: Uruguaiana a 9,87 m, acima da cota de inundação.</li></ul>
-<div class="note">Estudo do SGB: quase metade das inundações ocorreu em fase de El Niño; as extremas, em El Niño e neutro.</div></article>
-</div>
+      <!-- Missão 3 -->
+      <div class="pane" role="tabpanel" id="p-missao-3" hidden>
+        <div class="crumb">Missões / 3 · ONI de mar–mai a jul–set</div>
+        <h3 class="big">O El Niño cresce em ritmo constante?</h3>
+        <div class="callout"><span><b>Ementa.</b> Escala logarítmica; crescimento exponencial; taxa r = ln(fator); tempo para dobrar; por que o ln não aceita números negativos.</span></div>
+        <p>Crescer em ritmo constante é ser multiplicado pelo mesmo número a cada mês. No gráfico comum isso vira uma curva que dispara; na <b>escala logarítmica</b>, vira uma <b>reta</b>. Troque a escala e compare com a linha cinza de ×1,2 por mês.</p>
+        <div class="box" style="margin:16px 0">
+          <div class="ctrl" style="justify-content:space-between">
+            <div class="seg" id="m3-scale" role="group" aria-label="Escala do eixo vertical"><button type="button" data-s="lin" aria-pressed="false">Escala comum</button><button type="button" data-s="log" aria-pressed="true">Escala log</button></div>
+            <div class="chips" id="m3-chips" role="group" aria-label="Mostrar ou ocultar eventos"></div>
+          </div>
+          <div class="plot" id="m3-plot"></div>
+          <p class="cap" style="margin:8px 0 0">Passe o cursor para ver o valor e o fator em relação ao mês anterior. Linha cinza tracejada: crescimento fixo de ×1,2 por mês.</p>
+        </div>
+        <div class="tw"><table class="t">
+          <thead><tr><th>Evento</th><th>MAM→AMJ</th><th>AMJ→MJJ</th><th>MJJ→JJA</th><th>JJA→JAS</th></tr></thead>
+          <tbody>
+            <tr><td>1982</td><td>×1,91</td><td>×1,12</td><td>×1,07</td><td>×1,27</td></tr>
+            <tr><td>1997</td><td>×2,37</td><td>×1,59</td><td>×1,31</td><td>×1,21</td></tr>
+            <tr><td>2015</td><td>×1,21</td><td>×1,14</td><td>×1,21</td><td>×1,20</td></tr>
+            <tr><td>2023</td><td>×2,42</td><td>×1,59</td><td>×1,37</td><td>×1,25</td></tr>
+            <tr class="hl"><td>2026</td><td>×2,07</td><td>×1,46</td><td>×1,29</td><td>×1,20</td></tr>
+          </tbody></table></div>
+        <div class="box" style="margin-top:16px">
+          <h4>Confira suas respostas (2026)</h4>
+          <div class="checks">
+            <div class="check"><label for="c1">r do primeiro fator (×2,07) =</label><input id="c1" inputmode="decimal" autocomplete="off" data-ans="0.73" data-tol="0.03"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+            <div class="check"><label for="c2">Tempo para dobrar no fim (meses) =</label><input id="c2" inputmode="decimal" autocomplete="off" data-ans="3.8" data-tol="0.04"><button type="button" class="btn-out">Conferir</button><span class="fb"></span></div>
+          </div>
+          <p class="cap" style="margin:10px 0 0">Perguntas abertas: qual evento tem a linha quase reta? Por que não usamos os meses com ONI negativo?</p>
+        </div>
+        <details class="sol"><summary>Ver a solução</summary>
+        <div class="sol-b">
+          <p><b>1.</b> Primeiro fator: 0,95 ÷ 0,46 = 2,07 e r = ln 2,07 = <b>0,73</b>. Último fator: 2,16 ÷ 1,80 = 1,20 e r = ln 1,20 = 0,18.</p>
+          <p class="calc-tip">Na calculadora: <kbd>ln</kbd> 2,16 ÷ 1,8 <kbd>)</kbd> <kbd>=</kbd></p>
+          <p><b>2.</b> No começo: 0,693 ÷ 0,73 ≈ 1 mês. No fim: 0,693 ÷ 0,18 ≈ <b>3,8 meses</b>. O ritmo caiu para um quarto.</p>
+          <p><b>3.</b> <b>2015</b>: os fatores ficam entre 1,14 e 1,21 e a linha é quase reta. 1997, 2023 e 2026 começam com ×2 ou mais e terminam perto de ×1,2: a linha entorta para baixo, sinal de que o crescimento perde força.</p>
+          <p><b>4.</b> O ln de um número negativo não existe (lição 6 da calculadora). Por isso a análise começa quando o ONI já é positivo.</p>
+          <p class="lim">Cuidado: o ONI é uma média de três meses de uma diferença de temperatura, e os fatores dependem do ponto de partida. As contas descrevem a curva e não preveem o pico de 2026.</p>
+        </div></details>
+      </div>
 
-<h2>Os reservatórios.</h2>
-<p class="lead">Volume útil mensal de jan/2022 a out/2026 (ONS). A barra azul vai da mínima à máxima do período; o marcador vermelho é out/2026. Valores lidos do gráfico, com erro de alguns pontos.</p>
-<div class="card"><div class="rs">
-<div class="n"><b>Balbina</b><span>Amazonas</span></div><div class="trk"><div class="rng" style="left:0%;width:93%"></div><div class="cur" style="left:61%"></div></div><div class="v">61%</div>
-<div class="n"><b>Sobradinho</b><span>São Francisco</span></div><div class="trk"><div class="rng" style="left:41%;width:59%"></div><div class="cur" style="left:65%"></div></div><div class="v">65%</div>
-<div class="n"><b>Manso</b><span>Paraguai</span></div><div class="trk"><div class="rng" style="left:35%;width:63%"></div><div class="cur" style="left:73%"></div></div><div class="v">73%</div>
-<div class="n"><b>Ilha Solteira</b><span>Paraná</span></div><div class="trk"><div class="rng" style="left:50%;width:45%"></div><div class="cur" style="left:66%"></div></div><div class="v">66%</div>
-<div class="n"><b>Machadinho</b><span>Uruguai</span></div><div class="trk"><div class="rng" style="left:9%;width:91%"></div><div class="cur" style="left:73%"></div></div><div class="v">73%</div>
-<div class="ax"><span>0%</span><span>50%</span><span>100%</span></div></div>
-<ul style="margin:18px 0 0;padding-left:18px;font-size:15px">
-<li><b>Balbina</b> é o mais sensível: foi a cerca de 11% no início de 2024 e a perto de 0% no início de 2025, com ONI neutro.</li>
-<li><b>Sobradinho</b> ficou em cerca de 41% nas mínimas de 2024 e 2025, longe do colapso de 2015, e chegou a 100% em abr/2026.</li>
-<li><b>Manso</b> teve mínima de cerca de 35% em out/2024, junto com o nível recorde baixo do Rio Paraguai.</li>
-<li><b>Machadinho</b> varia de ~9% a 100% em poucos meses: tem pouco armazenamento e reflete a operação, então serve mal para medir efeito do clima.</li>
-<li>Em out/2026 os cinco estão entre 61% e 73%, sem crise, antes de uma estação seca com El Niño muito forte.</li></ul></div>
+      <!-- Missão 4 -->
+      <div class="pane" role="tabpanel" id="p-missao-4" hidden>
+        <div class="crumb">Missões / 4 · Desafio</div>
+        <h3 class="big">Ligue o ONI a uma vazão</h3>
+        <div class="callout"><span><b>Ementa.</b> Logaritmo de uma divisão; ler o resultado como "quantas vezes"; escolha da variável (vazão ou volume, não cota); valores fora do domínio do ln.</span></div>
+        <p>Com uma tabela de vazão mensal e o ONI, o script divide a vazão de cada mês pela média daquele mês, aplica o ln e procura um número <b>β</b> que liga o ONI ao resultado. O número <b>e<sup>β</sup></b> diz quantas vezes a vazão muda para cada +1 °C de ONI.</p>
+        <div class="box" style="margin:16px 0">
+          <h4>Explore β</h4>
+          <div class="sim-ctl even">
+            <div class="field"><label for="bb">β <output id="bb-o" for="bb">0,10</output></label><input type="range" id="bb" min="-0.3" max="0.3" step="0.01" value="0.1"></div>
+            <div class="field"><label for="bo">ONI (°C) <output id="bo-o" for="bo">+2,0</output></label><input type="range" id="bo" min="-1.5" max="3" step="0.1" value="2"></div>
+          </div>
+          <div class="big-out" id="b-out">×1,22</div>
+          <div class="mult" aria-hidden="true"><i id="b-bar"></i><span class="mid"></span></div>
+          <div class="cap" id="b-txt">A vazão ficaria 22% acima da média do mês.</div>
+        </div>
+        <ul class="q">
+          <li>Exemplo: se β = 0,10, então e<sup>0,10</sup> = 1,105: a vazão sobe cerca de 10,5% por °C. Em um El Niño de +2 °C: e<sup>0,20</sup> = 1,22, ou 22% a mais.</li>
+          <li>β negativo descreve rios que secam com El Niño, como o Negro em Manaus.</li>
+          <li>Use vazão ou volume, não cota: a cota já é uma escala logarítmica da vazão. Meses com valor zero ficam de fora, porque o ln não aceita zero.</li>
+        </ul>
+        <p class="cap">No script Python, a opção <kbd>--log</kbd> faz esse cálculo para cada rio.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>Cenário de investigação.</h2>
-<p class="lead">Imagine que você é cientista de rios. O El Niño muda a chuva, e a chuva muda a quantidade de água que passa pelos rios e que fica nos reservatórios. Com exponencial, logaritmo e uma calculadora científica dá para medir isso. Comece pelo aquecimento e pelo tutorial da calculadora, depois resolva as missões.</p>
-
-<div class="card obj" style="margin-bottom:16px">
-<h3>Objetivo geral</h3>
-<p style="margin:0;max-width:720px">Entender, com funções exponenciais e logarítmicas, como a quantidade de água dos grandes rios do Brasil muda em anos de El Niño, e saber até onde essas contas valem.</p>
-<ul>
-<li>Transformar a altura da água na régua (cota) em vazão, e o contrário.</li>
-<li>Calcular em quanto tempo um reservatório perde metade da água.</li>
-<li>Usar o gráfico em escala logarítmica para ver se algo cresce em ritmo constante.</li>
-<li>Ler o resultado como "quantas vezes a vazão muda".</li>
-</ul>
-</div>
-
-<div class="card">
-<b>Aquecimento: quatro ideias</b>
-<div class="tiles">
-<div class="tile"><b>Potência</b><p>2³ = 2 × 2 × 2 = 8. O 3 é o <i>expoente</i>: quantas vezes o 2 se multiplica.</p></div>
-<div class="tile"><b>Logaritmo</b><p>É o caminho de volta. "2 elevado a quanto dá 8?" Resposta: 3. Por isso log₂ 8 = 3. O <b>log</b> da calculadora usa base 10: log 1000 = 3, porque 10³ = 1000.</p></div>
-<div class="tile"><b>O número e e o ln</b><p>e vale cerca de 2,718. O <b>ln</b> é o logaritmo com base e. As teclas <b>eˣ</b> e <b>ln</b> se desfazem: ln(eˣ) = x.</p></div>
-<div class="tile"><b>Crescer por multiplicação</b><p>Dobrar, triplicar, cair pela metade. Em um rio, +4 m de cota deixam a vazão 2 vezes maior. Isso é exponencial.</p></div>
-</div>
-<div class="tiles" style="margin-top:12px">
-<div class="tile gl"><b>Cota</b><p>Altura da água na régua do rio, em metros.</p></div>
-<div class="tile gl"><b>Vazão</b><p>Volume de água que passa por segundo, em m³/s.</p></div>
-<div class="tile gl"><b>Volume útil</b><p>Parte do reservatório que pode ser usada, em %.</p></div>
-<div class="tile gl"><b>ONI</b><p>Termômetro do El Niño: quanto o Pacífico está mais quente que o normal, em °C.</p></div>
-</div>
-</div>
-
-<div class="card mis" id="tutorial">
-<h3>Tutorial: calculadora científica</h3>
-<p class="tagline">Escolha uma lição e aperte a tecla que está piscando, ou veja a animação</p>
-<div class="tabs" id="ctabs" role="tablist" aria-label="Lições da calculadora"></div>
-<div class="calc-wrap">
-<div>
-<div class="calc" id="calc" aria-label="Calculadora científica de demonstração">
-<div class="lcd" aria-hidden="true"><div id="cx"></div><div id="cr"></div></div>
-<div class="kb" id="kb"></div>
-</div>
-</div>
-<div>
-<p style="margin:0 0 4px"><b id="cgoal"></b></p>
-<p class="cap" id="cnote" style="margin:0 0 10px"></p>
-<ol class="steps" id="csteps" aria-live="polite"></ol>
-<div class="ctl">
-<button type="button" id="cplay" class="pri">▶ Reproduzir</button>
-<button type="button" id="cnext">Próximo passo</button>
-<button type="button" id="creset">Reiniciar</button>
-</div>
-<p class="cap" id="chint" style="margin:10px 0 0" aria-live="polite">Aperte a tecla que está piscando.</p>
-</div>
-</div>
-<p class="cap" style="margin:14px 0 0">A posição das teclas muda de modelo para modelo, mas os nomes são estes. Em calculadoras antigas, digite o número primeiro e depois aperte a tecla (por exemplo, 2 e depois ln).</p>
-</div>
-
-<div class="card mis">
-<h3>Missão 1. A régua do rio e a vazão</h3>
-<p class="tagline">Rio Uruguai em Uruguaiana (RS) · exponencial e logaritmo, um desfazendo o outro</p>
-<div class="em"><b>Ementa.</b> Função exponencial; logaritmo como o caminho de volta; o número e e o ln; quantas vezes a vazão muda por metro; tempo para dobrar; limites de um ajuste com dois pontos.</div>
-<p>Em Uruguaiana, a régua mostra a altura da água (a <b>cota</b>, em metros). A <b>vazão</b>, que é a água que passa por segundo (m³/s), cresce por multiplicação quando a cota sobe. Há dois registros reais do Serviço Geológico do Brasil:</p>
-<ul class="q">
-<li>cota de 7,5 m ↔ vazão de 10.942 m³/s;</li>
-<li>cota de 13,54 m ↔ vazão de 31.025 m³/s (julho de 1983, El Niño forte).</li>
-</ul>
-<p>Vamos usar a regra <b>Q = 10.942 · e<sup>b·(h − 7,5)</sup></b>, em que h é a cota e b é um número que você vai descobrir.</p>
-<ol class="q">
-<li>Qual é o valor de b? Quantas vezes a vazão cresce a cada metro de cota?</li>
-<li>Qual é a vazão quando a cota está em 9,87 m (out/2023)?</li>
-<li>A vazão de 1983 (cota de 13,58 m) foi quantas vezes a de out/2023?</li>
-<li>Em que cota a vazão é de 20.000 m³/s?</li>
-</ol>
-
-<div class="sim">
-<label for="hh"><b>Mova a régua</b> · cota em Uruguaiana</label>
-<input type="range" id="hh" min="6" max="14" step="0.01" value="9.87" aria-describedby="hhout">
-<div class="out" id="hhout" aria-live="polite">
-<div><b id="o-h">9,87 m</b><span>cota</span></div>
-<div><b id="o-q">16.470</b><span>vazão (m³/s)</span></div>
-<div><b id="o-r">1,51×</b><span>vezes a vazão de 7,5 m</span></div>
-<div><b id="o-d">0,59</b><span>vezes que a vazão dobrou</span></div>
-</div>
-</div>
-
-<details><summary>Ver a solução</summary>
-<div class="sol">
-<p><b>1.</b> Coloque o segundo registro na regra: 31.025 = 10.942 · e<sup>b·6,04</sup>. Divida os dois lados por 10.942: e<sup>b·6,04</sup> = 2,835. Agora aplique o <b>ln</b> nos dois lados, porque ele desfaz o e: b · 6,04 = ln 2,835 = 1,042. Logo b = 1,042 ÷ 6,04 ≈ <b>0,1725</b>.</p>
-<p class="calc-tip">Na calculadora: <kbd>ln</kbd> 31025 ÷ 10942 <kbd>)</kbd> ÷ 6,04 <kbd>=</kbd> (lição 5)</p>
-<p>A cada metro, a vazão é multiplicada por e<sup>0,1725</sup> = 1,19, ou seja, cresce cerca de 19%. <span class="calc-tip">Calculadora: <kbd>SHIFT</kbd> <kbd>ln</kbd> 0,1725 <kbd>)</kbd> <kbd>=</kbd> (lição 4)</span>. Para dobrar a vazão: ln 2 ÷ 0,1725 ≈ <b>4,02 m</b>.</p>
-<p><b>2.</b> Expoente: 0,1725 · (9,87 − 7,5) = 0,1725 · 2,37 = 0,409. Então e<sup>0,409</sup> = 1,505 e Q = 10.942 · 1,505 ≈ <b>16.470 m³/s</b>.</p>
-<p><b>3.</b> A cota subiu 13,58 − 9,87 = 3,71 m. A vazão ficou multiplicada por e<sup>0,1725·3,71</sup> = e<sup>0,640</sup> ≈ <b>1,9</b>. Quase o dobro.</p>
-<p><b>4.</b> 20.000 = 10.942 · e<sup>0,1725·(h − 7,5)</sup>. Divida por 10.942 e aplique o ln: 0,1725 · (h − 7,5) = ln(20.000 ÷ 10.942) = 0,603. Então h − 7,5 = 0,603 ÷ 0,1725 = 3,50 e <b>h ≈ 11,0 m</b>.</p>
-<p class="lim">Cuidado: é um ajuste didático feito com só dois pontos. A tabela real do rio é mais complicada. A regra serve entre 7,5 m e 13,5 m. Em 13,58 m ela dá 31.240 m³/s, contra 30.786 m³/s oficiais (diferença de 1,5%).</p>
-</div></details>
-</div>
-
-<div class="card mis">
-<h3>Missão 2. Quanto tempo um reservatório aguenta</h3>
-<p class="tagline">Sobradinho (São Francisco) e Balbina (Amazonas) · queda exponencial e meia-vida</p>
-<div class="em"><b>Ementa.</b> Queda exponencial; a constante k; meia-vida; equações exponenciais resolvidas com logaritmo; por que o ln não aceita zero; limites do modelo.</div>
-<p>Sem chuva, o volume útil V (em %) cai pela regra <b>V = V₀ · e<sup>−k·t</sup></b>, em que V₀ é o volume do início, t é o tempo em meses e k diz a rapidez da queda. Dois casos:</p>
-<ul class="q">
-<li><b>Sobradinho, 2015:</b> de 18,88% em janeiro para menos de 1% em dezembro (11 meses).</li>
-<li><b>Balbina, 2023–24:</b> de cerca de 100% em maio para cerca de 11% em fevereiro (9 meses, lido do gráfico do ONS).</li>
-</ul>
-<ol class="q">
-<li>Qual é o k de cada um? Use k = ln(V₀ ÷ V) ÷ t.</li>
-<li>Qual é a meia-vida, o tempo para o volume cair à metade? Use ln 2 ÷ k.</li>
-<li>Quanto tempo Balbina leva para ir de 100% a 10%, e de 100% a 1%? Use ln(V₀ ÷ V) ÷ k.</li>
-<li>Por que o modelo nunca chega a 0%?</li>
-</ol>
-<div class="tw"><table class="t">
-<thead><tr><th></th><th>k (por mês)</th><th>Meia-vida</th><th>Perde por mês</th></tr></thead>
-<tbody>
-<tr><td>Sobradinho 2015</td><td>pelo menos 0,267</td><td>até 2,6 meses</td><td>pelo menos 23%</td></tr>
-<tr><td>Balbina 2023–24</td><td>0,245</td><td>2,8 meses</td><td>22%</td></tr>
-</tbody></table></div>
-<details><summary>Ver a solução</summary>
-<div class="sol">
-<p><b>1.</b> Sobradinho: k = ln(18,88 ÷ 1) ÷ 11 = 2,938 ÷ 11 = 0,267 por mês. É "pelo menos" porque o volume ficou abaixo de 1%. Balbina: k = ln(100 ÷ 11) ÷ 9 = 2,207 ÷ 9 = 0,245 por mês.</p>
-<p class="calc-tip">Na calculadora: <kbd>ln</kbd> 100 ÷ 11 <kbd>)</kbd> ÷ 9 <kbd>=</kbd></p>
-<p><b>2.</b> Sobradinho: 0,693 ÷ 0,267 = 2,6 meses. Balbina: 0,693 ÷ 0,245 = 2,8 meses. Em menos de 3 meses o reservatório perde metade do que tem.</p>
-<p><b>3.</b> De 100% a 10%: ln 10 ÷ 0,245 = <b>9,4 meses</b>. De 100% a 1%: ln 100 ÷ 0,245 = <b>18,8 meses</b>. Cada queda de 10 vezes leva o mesmo tempo.</p>
-<p><b>4.</b> O ln só existe para números maiores que zero. Tente ln 0 na calculadora: aparece erro. A curva exponencial chega cada vez mais perto de 0 sem tocar. Balbina chegou a cerca de 0% no início de 2025, e esse ponto não entra na conta.</p>
-<p class="lim">Cuidado: quando a água sai sempre na mesma quantidade, a queda real parece mais com uma reta. Use o k só para ter uma ideia da rapidez, não para prever.</p>
-</div></details>
-</div>
-
-<div class="card mis">
-<h3>Missão 3. O El Niño cresce em ritmo constante?</h3>
-<p class="tagline">ONI de mar–mai a jul–set · gráfico em escala logarítmica</p>
-<div class="em"><b>Ementa.</b> Escala logarítmica no gráfico; crescimento exponencial; taxa de crescimento r = ln(fator); tempo para dobrar; por que o ln não aceita números negativos.</div>
-<p>Crescer em ritmo constante significa ser multiplicado pelo mesmo número a cada mês (por exemplo, ×1,2). Esse é o crescimento exponencial. No gráfico comum ele vira uma curva que dispara. Na <b>escala logarítmica</b> ele vira uma <b>reta</b>. Se a linha entorta para baixo, o ritmo está diminuindo. Os dados abaixo são reais (NOAA).</p>
-<div class="card chart" style="margin:14px 0 0;padding:18px"><svg id="sl" viewBox="0 0 640 300" role="img" aria-label="ONI em escala logarítmica de mar–mai a jul–set para cinco eventos"></svg><div class="leg"><span>Eixo vertical em escala logarítmica (ONI em °C). Linha cinza tracejada: crescimento fixo de ×1,2 por mês.</span></div></div>
-<p style="margin-top:14px">A tabela mostra quantas vezes o ONI cresceu de uma época para a seguinte (é só dividir cada valor pelo anterior). Em 2026 os valores são 0,46; 0,95; 1,39; 1,80 e 2,16.</p>
-<div class="tw"><table class="t">
-<thead><tr><th>Evento</th><th>MAM→AMJ</th><th>AMJ→MJJ</th><th>MJJ→JJA</th><th>JJA→JAS</th></tr></thead>
-<tbody>
-<tr><td>1982</td><td>×1,91</td><td>×1,12</td><td>×1,07</td><td>×1,27</td></tr>
-<tr><td>1997</td><td>×2,37</td><td>×1,59</td><td>×1,31</td><td>×1,21</td></tr>
-<tr><td>2015</td><td>×1,21</td><td>×1,14</td><td>×1,21</td><td>×1,20</td></tr>
-<tr><td>2023</td><td>×2,42</td><td>×1,59</td><td>×1,37</td><td>×1,25</td></tr>
-<tr class="hl"><td>2026</td><td>×2,07</td><td>×1,46</td><td>×1,29</td><td>×1,20</td></tr>
-</tbody></table></div>
-<ol class="q">
-<li>Em 2026, calcule a taxa r = ln(fator) para o primeiro e o último fator.</li>
-<li>Calcule o tempo para dobrar, ln 2 ÷ r, no começo e no fim da subida.</li>
-<li>Qual evento tem uma linha quase reta no gráfico?</li>
-<li>Por que não usamos os meses em que o ONI era negativo?</li>
-</ol>
-<details><summary>Ver a solução</summary>
-<div class="sol">
-<p><b>1.</b> Primeiro fator: 0,95 ÷ 0,46 = 2,07 e r = ln 2,07 = <b>0,73</b>. Último fator: 2,16 ÷ 1,80 = 1,20 e r = ln 1,20 = <b>0,18</b>.</p>
-<p class="calc-tip">Na calculadora: <kbd>ln</kbd> 2,16 ÷ 1,8 <kbd>)</kbd> <kbd>=</kbd></p>
-<p><b>2.</b> No começo: 0,693 ÷ 0,73 ≈ <b>1 mês</b>. No fim: 0,693 ÷ 0,18 ≈ <b>3,8 meses</b>. O ritmo caiu para um quarto.</p>
-<p><b>3.</b> <b>2015</b>: os fatores ficam entre 1,14 e 1,21 e a linha é quase reta. 1997, 2023 e 2026 começam com ×2 ou mais e terminam perto de ×1,2: a linha entorta para baixo, sinal de que o crescimento perde força.</p>
-<p><b>4.</b> O ln de um número negativo não existe. Tente ln(−3) na calculadora (lição 6): aparece erro. Por isso a análise começa nos meses em que o ONI já é positivo.</p>
-<p class="lim">Cuidado: o ONI é uma média de três meses de uma diferença de temperatura, e os fatores dependem do ponto de partida. As contas descrevem a curva e não preveem o pico de 2026.</p>
-</div></details>
-</div>
-
-<div class="card mis">
-<h3>Missão 4. Desafio: use seus próprios dados</h3>
-<p class="tagline">Ligar o ONI a uma vazão ou a um volume</p>
-<div class="em"><b>Ementa.</b> Logaritmo de uma divisão; ler o resultado como "quantas vezes"; escolha da variável (vazão ou volume, não cota); valores fora do domínio do ln.</div>
-<p>Com uma tabela de vazão mensal e o ONI, o script faz três coisas: divide a vazão de cada mês pela média daquele mês, aplica o ln nesse resultado e procura um número <b>β</b> que liga o ONI ao resultado.</p>
-<ul class="q" style="padding-left:18px">
-<li>O número <b>e<sup>β</sup></b> diz quantas vezes a vazão muda para cada +1 °C de ONI.</li>
-<li>Exemplo: se β = 0,10, então e<sup>0,10</sup> = 1,105: a vazão sobe cerca de 10,5% por °C. Em um El Niño de +2 °C: e<sup>0,20</sup> = 1,22, ou 22% a mais.</li>
-<li>Use vazão ou volume, não cota. A cota já é uma escala logarítmica da vazão. Meses com valor zero ficam de fora, porque o ln não aceita zero.</li>
-</ul>
-<p style="margin:12px 0 0;font-size:15px;color:var(--mut)">No script Python, a opção <b>--log</b> faz esse cálculo para cada rio.</p>
-</div>
-
-<h2>O que vem agora.</h2>
-<div class="card now"><b>Previsão oficial para o fim de 2026</b>
-<ul><li>Inmet e NOAA dão cerca de <b>95%</b> de chance de El Niño <b>muito forte</b> em out–dez, persistindo ao menos até o início de 2027.</li>
-<li><b>Norte:</b> menos chuva, calor acima da média e atraso da estação chuvosa, com queda gradual dos rios.</li>
-<li><b>Sul:</b> chuva acima da média e risco de cheias, incluindo o Rio Grande do Sul e partes de SP e MS.</li>
-<li>Norte de Goiás, Tocantins e Mato Grosso podem ter chuva abaixo do normal.</li></ul></div>
-
-<footer><b>Limites desta análise.</b> Não há aqui série contínua de vazão: os rios são descritos por eventos documentados. Para calcular correlações, use o script com séries da ANA/ONS.
-<ul><li>ONI: NOAA CPC, oni.ascii.txt (valores até jul–set 2026, que podem ser revisados).</li>
-<li>Rio Negro: SGB/Porto de Manaus. Sobradinho: ONS/ANA e dissertação UNIFACS (2016). Ladário: Embrapa e SGB. Paraná: Camilloni &amp; Barros (2000). Uruguai: SGB/ABRH (2023) e MetSul.</li>
-<li>Reservatórios: ONS, Dados Hidrológicos – Volumes (leitura visual do gráfico, jan/2022 a out/2026).</li>
-<li>Cota e vazão em Uruguaiana: SGB (cota de alerta 750 cm = 10.942 m³/s; 1.354 cm = 31.025 m³/s). O ajuste exponencial entre esses dois pontos é um modelo didático.</li>
-<li>Previsão: Inmet (Painel El Niño 2026–2027) e NOAA.</li></ul></footer>
+<!-- PREVISÃO -->
+<section id="previsao">
+  <div class="wrap">
+    <div class="act"><b>Epílogo</b><span>A previsão</span></div>
+    <div class="sec-head">
+      <span class="eyebrow">Inmet + NOAA</span>
+      <h2>O que vem agora.</h2>
+    </div>
+    <div class="fc">
+      <div class="acc night">
+        <div class="n95">95%</div>
+        <div><p>de chance de El Niño <b>muito forte</b> em out–dez, persistindo ao menos até o início de 2027.</p><div class="cap">Previsão oficial para o fim de 2026.</div></div>
+      </div>
+      <div class="card"><span class="reg-tag" style="--c:var(--drought)"><i></i>Menos chuva</span><h3>Norte</h3><p>Calor acima da média e atraso da estação chuvosa, com queda gradual dos rios.</p></div>
+      <div class="card"><span class="reg-tag" style="--c:var(--range)"><i></i>Mais chuva</span><h3>Sul</h3><p>Chuva acima da média e risco de cheias, incluindo o Rio Grande do Sul e partes de SP e MS.</p></div>
+      <div class="card"><span class="reg-tag" style="--c:var(--drought)"><i></i>Menos chuva</span><h3>Centro</h3><p>Norte de Goiás, Tocantins e Mato Grosso podem ter chuva abaixo do normal.</p></div>
+      <div class="card"><span class="reg-tag" style="--c:var(--midnight)"><i></i>Sem crise</span><h3>Reservatórios</h3><p>Os cinco começam entre 61% e 73%. Balbina é o primeiro a observar. <a href="#reservatorios">Ver o teste de estresse</a>.</p></div>
+    </div>
+  </div>
+</section>
 </main>
+
+<footer>
+  <div class="wrap">
+    <h2>Limites desta análise</h2>
+    <p>Não há aqui série contínua de vazão: os rios são descritos por eventos documentados. Para calcular correlações, use o script com séries da ANA/ONS. As projeções de reservatório são um modelo didático, não previsão.</p>
+    <ul>
+      <li>ONI: NOAA CPC, oni.ascii.txt (valores até jul–set 2026, que podem ser revisados).</li>
+      <li>Rio Negro: SGB/Porto de Manaus. Sobradinho: ONS/ANA e dissertação UNIFACS (2016). Ladário: Embrapa e SGB. Paraná: Camilloni &amp; Barros (2000). Uruguai: SGB/ABRH (2023) e MetSul.</li>
+      <li>Reservatórios: ONS, Dados Hidrológicos – Volumes (leitura visual do gráfico, jan/2022 a out/2026).</li>
+      <li>Cota e vazão em Uruguaiana: SGB (cota de alerta 750 cm = 10.942 m³/s; 1.354 cm = 31.025 m³/s). O ajuste exponencial entre esses dois pontos é um modelo didático.</li>
+      <li>Previsão: Inmet (Painel El Niño 2026–2027) e NOAA.</li>
+    </ul>
+  </div>
+</footer>
+
 <script>
+/* ===== utilidades ===== */
+var NS="http://www.w3.org/2000/svg";
+function fmt(n,d){return n.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})}
+function sgn(n,d){return(n>0?"+":n<0?"−":"")+fmt(Math.abs(n),d)}
+var COL={"2026":"#f64932","2023":"#097fe8","2015":"#d18a00","1997":"#7b5cd6","1982":"#2f9e6f"};
+var ORDER=["2026","2023","2015","1997","1982"];
+
+/* ===== gráfico de linhas genérico com crosshair e tooltip ===== */
+function plot(el,cfg){
+  var W0=cfg.W||720,H0=cfg.H||340,W=W0,H=H0,m=cfg.m||{l:44,r:64,t:18,b:30};
+  var svg=document.createElementNS(NS,"svg");svg.setAttribute("role","img");
+  function size(){var w=Math.round(el.clientWidth)||W0;W=Math.max(280,w);H=W<560?Math.round(Math.min(W*.95,380)):Math.min(460,Math.round(W*H0/W0));svg.setAttribute("viewBox","0 0 "+W+" "+H)}
+  size();svg.setAttribute("aria-label",cfg.label);svg.setAttribute("tabindex","0");
+  var tip=document.createElement("div");tip.className="tip";tip.hidden=true;el.appendChild(svg);el.appendChild(tip);
+  var api={cfg:cfg,hidden:{},hx:null};
+  function sx(v){var x=api.cfg.x;return m.l+(v-x.min)/(x.max-x.min)*(W-m.l-m.r)}
+  function sy(v){var y=api.cfg.y,h=H-m.t-m.b;if(y.log)return m.t+(Math.log(y.max)-Math.log(v))/(Math.log(y.max)-Math.log(y.min))*h;return m.t+(y.max-v)/(y.max-y.min)*h}
+  function ix(px){var x=api.cfg.x;return x.min+(px-m.l)/(W-m.l-m.r)*(x.max-x.min)}
+  function path(pts){return pts.map(function(p,i){return(i?"L":"M")+sx(p[0]).toFixed(1)+" "+sy(p[1]).toFixed(1)}).join("")}
+  api.sx=sx;api.sy=sy;
+  function render(){
+    var c=api.cfg,h="";
+    c.y.ticks.forEach(function(t){var yy=sy(t[0]);h+='<line class="grid'+(t[2]?" zero":"")+'" x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+yy+'" y2="'+yy+'"/><text class="ax" x="'+(m.l-8)+'" y="'+(yy+4)+'" text-anchor="end">'+t[1]+'</text>'});
+    var every=(W-m.l-m.r)/c.x.ticks.length<38?2:1;
+    c.x.ticks.forEach(function(t,i){if(i%every)return;h+='<text class="ax" x="'+sx(t[0])+'" y="'+(H-8)+'" text-anchor="middle">'+t[1]+'</text>'});
+    (c.refs||[]).forEach(function(r){if(r.axis==="x"){var xx=sx(r.v);h+='<line class="ref" x1="'+xx+'" x2="'+xx+'" y1="'+m.t+'" y2="'+(H-m.b)+'"/><text class="refl" x="'+(xx+4)+'" y="'+(m.t+(r.dy||10))+'">'+r.label+'</text>'}else{var yy=sy(r.v);h+='<line class="ref" x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+yy+'" y2="'+yy+'"/><text class="refl" x="'+(m.l+6)+'" y="'+(yy-6)+'">'+r.label+'</text>'}});
+    var labels=[];
+    c.series.forEach(function(s){if(api.hidden[s.id])return;var w=s.w||2;
+      if(s.area){var a=path(s.pts)+"L"+sx(s.pts[s.pts.length-1][0]).toFixed(1)+" "+sy(c.y.min)+"L"+sx(s.pts[0][0]).toFixed(1)+" "+sy(c.y.min)+"Z";h+='<path class="area" d="'+a+'" fill="'+s.c+'"/>'}
+      h+='<path d="'+path(s.pts)+'" fill="none" stroke="'+s.c+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"'+(s.dash?' stroke-dasharray="'+s.dash+'"':"")+'/>';
+      if(s.end!==false){var p=s.pts[s.pts.length-1];h+='<circle cx="'+sx(p[0])+'" cy="'+sy(p[1])+'" r="'+(w>2?5:4)+'" fill="'+s.c+'" stroke="#fff" stroke-width="2"/>'}
+      if(s.n){var q=s.pts[s.pts.length-1];labels.push({y:sy(q[1]),x:sx(q[0])+10,t:s.n,b:w>2})}
+    });
+    labels.sort(function(a,b){return a.y-b.y});
+    for(var i=1;i<labels.length;i++)if(labels[i].y-labels[i-1].y<14)labels[i].y=labels[i-1].y+14;
+    labels.forEach(function(l){h+='<text class="dl'+(l.b?" b":"")+'" x="'+l.x+'" y="'+(l.y+4)+'">'+l.t+'</text>'});
+    if(c.extra&&W>=480)h+=c.extra(api);
+    (c.marks||[]).forEach(function(k){var xx=sx(k.x),yy=sy(k.y);h+='<circle cx="'+xx+'" cy="'+yy+'" r="'+(k.r||5)+'" fill="'+(k.fill||"#fff")+'" stroke="'+k.c+'" stroke-width="2.5"/>';if(k.label)h+='<text class="mk" x="'+(xx+(k.dx||0))+'" y="'+(yy+(k.dy||-10))+'" text-anchor="'+(k.anchor||"middle")+'">'+k.label+'</text>'});
+    h+='<g class="hov"></g><rect x="'+m.l+'" y="'+m.t+'" width="'+(W-m.l-m.r)+'" height="'+(H-m.t-m.b)+'" fill="transparent" style="cursor:crosshair"/>';
+    svg.innerHTML=h;if(api.hx!=null)hover(api.hx);
+  }
+  function snapX(v){var c=api.cfg;if(c.snap){var b=c.snap[0];c.snap.forEach(function(s){if(Math.abs(s-v)<Math.abs(b-v))b=s});return b}v=Math.max(c.x.min,Math.min(c.x.max,v));return c.step?Math.round(v/c.step)*c.step:v}
+  function hover(xv){api.hx=xv;var g=svg.querySelector(".hov");if(!g)return;var xx=sx(xv),info=api.cfg.tip(xv,api),h='<line class="cross" x1="'+xx+'" x2="'+xx+'" y1="'+m.t+'" y2="'+(H-m.b)+'"/>';
+    info.pts.forEach(function(p){h+='<circle cx="'+xx+'" cy="'+sy(p.y)+'" r="5" fill="'+p.c+'" stroke="#fff" stroke-width="2"/>'});
+    g.innerHTML=h;tip.innerHTML=info.html;tip.hidden=false;var f=xx/W;
+    if(f>.55){tip.style.left="auto";tip.style.right=((1-f)*100+2)+"%"}else{tip.style.right="auto";tip.style.left=(f*100+2)+"%"}}
+  function leave(){api.hx=null;var g=svg.querySelector(".hov");if(g)g.innerHTML="";tip.hidden=true}
+  function evx(e){var r=svg.getBoundingClientRect();return ix((e.clientX-r.left)/r.width*W)}
+  svg.addEventListener("pointermove",function(e){hover(snapX(evx(e)))});
+  svg.addEventListener("pointerleave",function(e){if(e.pointerType==="mouse")leave()});
+  svg.addEventListener("pointerdown",function(e){var v=snapX(evx(e));hover(v);if(api.cfg.onPick)api.cfg.onPick(v)});
+  svg.addEventListener("keydown",function(e){var c=api.cfg;if(e.key==="Escape"){leave();return}if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;e.preventDefault();var d=e.key==="ArrowRight"?1:-1,cur=api.hx==null?(c.snap?c.snap[c.snap.length-1]:c.x.min):api.hx,nv;
+    if(c.snap){var i=c.snap.indexOf(cur);nv=c.snap[Math.max(0,Math.min(c.snap.length-1,i+d))]}else nv=Math.max(c.x.min,Math.min(c.x.max,+(cur+d*(c.kstep||c.step||1)).toFixed(4)));hover(nv);if(c.onPick)c.onPick(nv)});
+  svg.addEventListener("blur",leave);
+  api.render=render;api.leave=leave;render();
+  if(window.ResizeObserver){var lw=0;new ResizeObserver(function(){var w=Math.round(el.clientWidth);if(w&&Math.abs(w-lw)>2){lw=w;size();render()}}).observe(el)}
+  return api;
+}
+function chips(box,ids,api,after){
+  ids.forEach(function(id){var b=document.createElement("button");b.type="button";b.className="chip";b.style.setProperty("--c",COL[id]);b.setAttribute("aria-pressed","true");b.innerHTML="<i></i>"+id;
+    b.addEventListener("click",function(){var on=b.getAttribute("aria-pressed")==="true";
+      var vis=ids.filter(function(k){return!api.hidden[k]}).length;if(on&&vis===1)return;
+      b.setAttribute("aria-pressed",on?"false":"true");api.hidden[id]=on;api.render();if(after)after()});
+    b.addEventListener("pointerenter",function(){if(api.hidden[id])return;var p=api.cfg.series;p.forEach(function(s){s._w=s._w||s.w||2;s.w=s.id===id?Math.max(s._w,4):s._w});api.render()});
+    b.addEventListener("pointerleave",function(){api.cfg.series.forEach(function(s){if(s._w)s.w=s._w});api.render()});
+    box.appendChild(b)});
+}
+function tipRows(rows){return rows.map(function(r){return'<div class="tr"><span><i style="background:'+r.c+'"></i>'+r.n+'</span><b>'+r.v+'</b></div>'}).join("")}
+
+/* ===== ONI ===== */
 (function(){
-var L=["jan","fev","mar","abr","mai","jun","jul","ago"];
-var S=[{n:"1982",c:"#8e8e93",v:[-.05,.02,.07,.34,.65,.73,.78,.99]},{n:"1997",c:"#bf5af2",v:[-.41,-.26,-.03,.3,.71,1.13,1.48,1.79]},{n:"2015",c:"#ff9f0a",v:[.73,.65,.72,.86,1.04,1.19,1.44,1.73]},{n:"2023",c:"#30b0c7",v:[-.55,-.33,-.11,.19,.46,.73,1,1.25]},{n:"2026",c:"#d1495b",v:[-.39,-.21,.11,.46,.95,1.39,1.8,2.16],b:1}];
-var W=640,H=300,l=40,r=60,t=16,b=30,mn=-.75,mx=2.4;
-function x(i){return l+i*(W-l-r)/7}function y(v){return t+(mx-v)*(H-t-b)/(mx-mn)}
-var h="";
-[-.5,0,.5,1,1.5,2].forEach(function(v){h+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="currentColor" opacity="'+(v==0?.35:.12)+'"/><text x="'+(l-8)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="11" fill="currentColor" opacity=".6">'+v.toFixed(1).replace(".",",")+'</text>'});
-L.forEach(function(m,i){h+='<text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="currentColor" opacity=".6">'+m+'</text>'});
-h+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+y(.5)+'" y2="'+y(.5)+'" stroke="#d1495b" stroke-dasharray="4 4" opacity=".6"/>';
-S.forEach(function(s){var d=s.v.map(function(v,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)}).join("");
-h+='<path d="'+d+'" fill="none" stroke="'+s.c+'" stroke-width="'+(s.b?4:2)+'" stroke-linecap="round" stroke-linejoin="round" opacity="'+(s.b?1:.85)+'"/>';
-h+='<circle cx="'+x(7)+'" cy="'+y(s.v[7])+'" r="'+(s.b?5:3.5)+'" fill="'+s.c+'"/><text x="'+(x(7)+10)+'" y="'+(y(s.v[7])+4)+'" font-size="12" font-weight="'+(s.b?700:500)+'" fill="'+s.c+'">'+s.n+'</text>'});
-var svg=document.getElementById("ch");svg.style.color=getComputedStyle(document.body).color;svg.innerHTML=h;
-document.getElementById("lg").innerHTML='<span>Eixo: ONI (°C), por mês central do trimestre</span><span><i style="background:#d1495b"></i>Linha tracejada: limiar de El Niño (+0,5)</span>';
+  var M=["jan","fev","mar","abr","mai","jun","jul","ago"],TRI=["DJF","JFM","FMA","MAM","AMJ","MJJ","JJA","JAS"];
+  var D={"1982":[-.05,.02,.07,.34,.65,.73,.78,.99],"1997":[-.41,-.26,-.03,.3,.71,1.13,1.48,1.79],"2015":[.73,.65,.72,.86,1.04,1.19,1.44,1.73],"2023":[-.55,-.33,-.11,.19,.46,.73,1,1.25],"2026":[-.39,-.21,.11,.46,.95,1.39,1.8,2.16]};
+  var series=ORDER.map(function(id){return{id:id,n:id,c:COL[id],w:id==="2026"?3.5:2,pts:D[id].map(function(v,i){return[i,v]})}});
+  var yt=[];for(var v=-.5;v<=2.51;v+=.5)yt.push([v,(v>0?"+":"")+fmt(v,1),Math.abs(v)<.01]);
+  var api=plot(document.getElementById("oni-plot"),{label:"ONI de janeiro a agosto para 1982, 1997, 2015, 2023 e 2026",x:{min:0,max:7,ticks:M.map(function(m,i){return[i,m]})},y:{min:-.75,max:2.6,ticks:yt},snap:[0,1,2,3,4,5,6,7],
+    refs:[{axis:"y",v:.5,label:"limiar +0,5"}],series:series,
+    extra:function(a){var h="";if(!a.hidden["2026"])h+='<text class="an" x="'+(a.sx(7)-10)+'" y="'+(a.sy(2.16)-12)+'" text-anchor="end">+2,16: o maior valor de agosto</text>';
+      if(!a.hidden["2015"])h+='<text class="an2" x="'+(a.sx(0)+4)+'" y="'+(a.sy(.73)-12)+'">2015 já começou o ano acima do limiar</text>';return h},
+    tip:function(x,api){var i=Math.round(x),rows=[],pts=[];series.forEach(function(s){if(api.hidden[s.id])return;rows.push({n:s.id,c:s.c,v:sgn(D[s.id][i],2)+" °C",val:D[s.id][i]});pts.push({y:D[s.id][i],c:s.c})});
+      rows.sort(function(a,b){return b.val-a.val});return{html:'<div class="th">'+M[i]+" · "+TRI[i]+"</div>"+tipRows(rows),pts:pts}}});
+  chips(document.getElementById("oni-chips"),ORDER,api);
+  var t="<thead><tr><th>Evento</th>"+M.map(function(m){return"<th>"+m+"</th>"}).join("")+"</tr></thead><tbody>";
+  ORDER.forEach(function(id){t+='<tr'+(id==="2026"?' class="hl"':"")+"><td>"+id+"</td>"+D[id].map(function(v){return"<td>"+sgn(v,2)+"</td>"}).join("")+"</tr>"});
+  document.getElementById("oni-tbl").innerHTML=t+"</tbody>";
+})();
+
+/* ===== Rios: filtro ===== */
+(function(){
+  var box=document.getElementById("rv-filter"),cards=document.querySelectorAll("#rivers .rv");
+  function filter(f){Array.prototype.forEach.call(box.children,function(x){x.setAttribute("aria-pressed",x.getAttribute("data-f")===f?"true":"false")});
+    document.getElementById("rivers").classList.toggle("f",f!=="all");
+    Array.prototype.forEach.call(cards,function(c){c.classList.remove("hi");c.hidden=!(f==="all"||c.getAttribute("data-t")===f)})}
+  box.addEventListener("click",function(e){var b=e.target.closest("button");if(b)filter(b.getAttribute("data-f"))});
+  var P=[["Amazonas",8,"var(--drought)"],["São Francisco",28,"var(--drought)"],["Paraguai",50,"var(--mut-2)"],["Paraná",73,"var(--range)"],["Uruguai",93,"var(--range)"]],sc=document.getElementById("scale");
+  P.forEach(function(p,i){var b=document.createElement("button");b.type="button";b.style.left=p[1]+"%";b.style.setProperty("--c",p[2]);b.innerHTML="<i></i><span>"+p[0]+"</span>";b.setAttribute("aria-label","Ver o cartão do rio "+p[0]);
+    b.addEventListener("click",function(){filter("all");var c=cards[i];c.classList.add("hi");c.scrollIntoView({block:"center"});setTimeout(function(){c.classList.remove("hi")},2200)});sc.appendChild(b)});
+})();
+
+/* ===== Reservatórios: teste de estresse ===== */
+var RES=(function(){
+  var R=[{n:"Balbina",b:"Amazonas",c:"#f64932",mn:0,mx:93,cur:61,note:"O mais sensível: foi a cerca de 11% no início de 2024 e a perto de 0% no início de 2025, com ONI neutro."},
+    {n:"Sobradinho",b:"São Francisco",mn:41,mx:100,cur:65,note:"Ficou em cerca de 41% nas mínimas de 2024 e 2025, longe do colapso de 2015 (abaixo de 1%), e chegou a 100% em abr/2026."},
+    {n:"Manso",b:"Paraguai",mn:35,mx:98,cur:73,note:"Teve mínima de cerca de 35% em out/2024, junto com o nível recorde baixo do Rio Paraguai em Ladário."},
+    {n:"Ilha Solteira",b:"Paraná",mn:50,mx:95,cur:66,note:"Faixa mais estreita do grupo, entre cerca de 50% e 95% no período."},
+    {n:"Machadinho",b:"Uruguai",mn:9,mx:100,cur:73,note:"Varia de ~9% a 100% em poucos meses: tem pouco armazenamento e reflete a operação, então serve mal para medir efeito do clima."}];
+  var rows=document.getElementById("rrows"),det=document.getElementById("rdet"),sl=document.getElementById("dm"),so=document.getElementById("dm-o"),seg=document.getElementById("dk"),sum=document.getElementById("rsum");
+  var k=.245,sel=0;
+  R.forEach(function(r,i){var b=document.createElement("button");b.type="button";b.className="rrow";b.setAttribute("aria-pressed",i===sel?"true":"false");
+    b.innerHTML='<span class="n"><b>'+r.n+'</b><span>'+r.b+'</span></span><span class="trk"><span class="rng" style="left:'+r.mn+'%;width:'+(r.mx-r.mn)+'%"></span><span class="lnk"></span><span class="cur" style="left:'+r.cur+'%"></span><span class="prj"></span></span><span class="v"></span>';
+    b.addEventListener("click",function(){select(i,false)});rows.appendChild(b)});
+  function proj(r){return r.cur*Math.exp(-k*(+sl.value))}
+  function draw(){var t=+sl.value;so.textContent=t+(t===1?" mês":" meses");
+    Array.prototype.forEach.call(rows.children,function(b,i){var r=R[i],p=proj(r),pe=b.querySelector(".prj"),ln=b.querySelector(".lnk");pe.style.left=p+"%";pe.hidden=t===0;ln.hidden=t===0;ln.style.left=p+"%";ln.style.width=(r.cur-p)+"%";
+      b.querySelector(".v").innerHTML=t===0?"<b>"+r.cur+"%</b>out/2026":"<b>"+r.cur+"%</b><span class=\"p\">→ "+fmt(p,0)+"%</span>";
+      b.setAttribute("aria-label",r.n+": "+r.cur+"% em out/2026"+(t?", projeção "+fmt(p,0)+"% após "+t+" meses":""))});
+    if(t===0){sum.innerHTML="Hoje os cinco estão entre <b>61% e 73%</b>, sem crise. Arraste os meses sem chuva para simular uma seca."}
+    else{var ps=R.map(proj),avg=ps.reduce(function(a,b){return a+b},0)/5,low=R.filter(function(r){return proj(r)<30}).map(function(r){return r.n});
+      sum.innerHTML="Com <b>"+t+" "+(t===1?"mês":"meses")+"</b> sem chuva e k = "+fmt(k,3)+", a média cairia de 67,6% para <b>"+fmt(avg,1)+"%</b>. "+(low.length?"Abaixo de 30%: <b>"+low.join(", ")+"</b>.":"Nenhum ficaria abaixo de 30%.")+" Modelo didático, não previsão."}
+    renderDet()}
+  function renderDet(){var r=R[sel],t=+sl.value,p=proj(r),th=Math.log(2)/k,t30=r.cur>30?Math.log(r.cur/30)/k:0;
+    det.innerHTML='<div class="crumb">'+r.b+'</div><h3>'+r.n+'</h3><div class="dstats"><div><span>Mínima</span><b>'+r.mn+'%</b></div><div><span>Máxima</span><b>'+r.mx+'%</b></div><div><span>Out/2026</span><b>'+r.cur+'%</b></div></div><p style="font-size:15px;color:var(--body)">'+r.note+'</p><div class="sum" style="margin-top:6px">No ritmo escolhido, perde metade a cada <b>'+fmt(th,1)+' meses</b> e chegaria a 30% em <b>'+fmt(t30,1)+' meses</b> sem chuva.'+(t?' Após '+t+' '+(t===1?'mês':'meses')+': <b>'+fmt(p,0)+'%</b>.':'')+'</div>'}
+  function select(i,scroll){sel=i;Array.prototype.forEach.call(rows.children,function(b,j){b.setAttribute("aria-pressed",j===i?"true":"false")});renderDet();
+    if(scroll)document.getElementById("reservatorios").scrollIntoView({block:"start"})}
+  sl.addEventListener("input",draw);
+  seg.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;k=+b.getAttribute("data-k");Array.prototype.forEach.call(seg.children,function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});draw()});
+  draw();return{select:select};
+})();
+document.querySelectorAll(".rv .go").forEach(function(b){b.addEventListener("click",function(){RES.select(+b.getAttribute("data-res"),true)})});
+
+/* ===== Workspace de missões ===== */
+var WS=(function(){
+  var side=document.getElementById("side"),tabs=side.querySelectorAll("button[data-p]");
+  function show(p,scroll){var ok=Array.prototype.some.call(tabs,function(b){return b.getAttribute("data-p")===p});if(!ok)return false;Array.prototype.forEach.call(tabs,function(b){var on=b.getAttribute("data-p")===p;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;document.getElementById("p-"+b.getAttribute("data-p")).hidden=!on});
+    if(ok&&scroll)document.getElementById("missoes").scrollIntoView({block:"start"});return ok}
+  Array.prototype.forEach.call(tabs,function(b,i){b.setAttribute("aria-controls","p-"+b.getAttribute("data-p"));
+    b.addEventListener("click",function(){show(b.getAttribute("data-p"));try{history.replaceState(null,"","#"+b.getAttribute("data-p"))}catch(e){}});
+    b.addEventListener("keydown",function(e){var d=(e.key==="ArrowDown"||e.key==="ArrowRight")?1:(e.key==="ArrowUp"||e.key==="ArrowLeft")?-1:0;if(!d)return;e.preventDefault();var n=tabs[(i+d+tabs.length)%tabs.length];n.focus();n.click()})});
+  document.querySelectorAll("[data-goto]").forEach(function(b){b.addEventListener("click",function(){show(b.getAttribute("data-goto"),true)})});
+  function fromHash(){var h=(location.hash||"").slice(1);if(h&&show(h,true))return true;return false}
+  if(!fromHash())show("aquecimento");
+  window.addEventListener("hashchange",fromHash);
+  document.querySelectorAll('a[href="#tutorial"],a[href^="#missao-"]').forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();show(a.getAttribute("href").slice(1),true)})});
+  return{show:show};
+})();
+
+/* ===== Conferir respostas ===== */
+(function(){
+  var all=document.querySelectorAll(".check"),done={};
+  function parse(s){s=String(s).trim().replace(/\s/g,"").replace(/[×x%]/gi,"");if(!s)return NaN;
+    if(s.indexOf(",")>=0)s=s.replace(/\./g,"").replace(",",".");else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,"");return parseFloat(s)}
+  function prog(){var n=Object.keys(done).filter(function(k){return done[k]}).length;document.getElementById("prog-t").textContent=n+" de "+all.length+" respostas certas";document.getElementById("prog-b").style.width=(n/all.length*100)+"%"}
+  Array.prototype.forEach.call(all,function(c){var inp=c.querySelector("input"),fb=c.querySelector(".fb"),btn=c.querySelector("button");
+    function go(){var v=parse(inp.value),a=+inp.getAttribute("data-ans"),tol=+inp.getAttribute("data-tol");c.classList.remove("ok","no");
+      if(isNaN(v)){fb.textContent="Digite um número, por exemplo 0,25.";c.classList.add("no");return}
+      var err=Math.abs(v-a)/Math.abs(a);
+      if(err<=tol){fb.textContent="✓ Certo.";c.classList.add("ok");done[inp.id]=true}
+      else if(err<=tol*4){fb.textContent="✗ Quase. Confira o arredondamento ou a ordem das contas.";c.classList.add("no");done[inp.id]=false}
+      else{fb.textContent="✗ Ainda não. A solução abaixo mostra o caminho.";c.classList.add("no");done[inp.id]=false}prog()}
+    btn.addEventListener("click",go);inp.addEventListener("keydown",function(e){if(e.key==="Enter")go()})});
+  prog();
+})();
+
+/* ===== Aquecimento ===== */
+(function(){
+  var seg=document.getElementById("wb"),x=document.getElementById("wx"),base="2",SUP={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹",",":"˒"};
+  function sup(s){return s.split("").map(function(ch){return SUP[ch]||ch}).join("")}
+  function draw(){var xv=+x.value,b=base==="e"?Math.E:+base,r=Math.pow(b,xv),xs=fmt(xv,1).replace(/,0$/,"");
+    document.getElementById("wx-o").textContent=xs.replace("-","−");
+    var rs=r>=1000?fmt(r,0):r>=1?fmt(r,r%1===0?0:3):fmt(r,4);
+    document.getElementById("w-pow").textContent=(base==="e"?"e":base)+sup(xs)+" = "+rs;
+    var lg=base==="e"?"ln":base==="10"?"log":"log₂";document.getElementById("w-log").textContent="De volta: "+lg+" "+rs+" = "+xs.replace("-","−")}
+  seg.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;base=b.getAttribute("data-b");Array.prototype.forEach.call(seg.children,function(z){z.setAttribute("aria-pressed",z===b?"true":"false")});draw()});
+  x.addEventListener("input",draw);draw();
+})();
+
+/* ===== Missão 1 ===== */
+(function(){
+  var h0=7.5,Q0=10942,b=Math.log(31025/10942)/(13.54-7.5);function Q(h){return Q0*Math.exp(b*(h-h0))}
+  var pts=[];for(var h=6;h<=14.0001;h+=.1)pts.push([+h.toFixed(2),Q(h)]);
+  var sl=document.getElementById("hh");
+  var yt=[[0,"0",1],[10000,"10 mil"],[20000,"20 mil"],[30000,"30 mil"]],xt=[];for(var i=6;i<=14;i++)xt.push([i,i+" m"]);
+  var api=plot(document.getElementById("m1-plot"),{label:"Vazão em função da cota no Rio Uruguai em Uruguaiana",W:620,H:300,m:{l:50,r:20,t:18,b:30},x:{min:6,max:14,ticks:xt},y:{min:0,max:36000,ticks:yt},step:.01,kstep:.1,
+    refs:[{axis:"x",v:7.5,label:"alerta 7,5",dy:10},{axis:"x",v:8.5,label:"inundação 8,5",dy:24}],
+    series:[{id:"q",c:"#097fe8",w:2.5,pts:pts,end:false,area:true}],
+    marks:[{x:9.87,y:Q(9.87),c:"#097fe8",label:"out/2023",dx:-6,anchor:"end"},{x:13.58,y:30786,c:"#2f9e6f",label:"1983 oficial",dx:-8,anchor:"end",dy:-8}],
+    tip:function(x){return{html:'<div class="th">Cota '+fmt(x,2)+' m</div>'+tipRows([{n:"Vazão",c:"#097fe8",v:fmt(Math.round(Q(x)),0)+" m³/s"},{n:"× vazão de 7,5 m",c:"#097fe8",v:fmt(Q(x)/Q0,2)}]),pts:[{y:Q(x),c:"#097fe8"}]}},
+    onPick:function(v){sl.value=v;upd()}});
+  var base=api.cfg.marks.slice();
+  function upd(){var h=parseFloat(sl.value),q=Q(h),r=q/Q0;
+    document.getElementById("o-h").textContent=fmt(h,2)+" m";document.getElementById("o-q").textContent=fmt(Math.round(q),0);
+    document.getElementById("o-r").textContent=fmt(r,2)+"×";document.getElementById("o-d").textContent=fmt(Math.log2(r),2);
+    document.getElementById("o-s").textContent=h<7.5?"Normal":h<8.5?"Alerta":"Inundação";
+    api.cfg.marks=base.concat([{x:h,y:q,c:"#02093a",fill:"#02093a",r:6}]);api.render()}
+  sl.addEventListener("input",upd);upd();
+})();
+
+/* ===== Missão 2 ===== */
+(function(){
+  var C={b:{v0:100,k:Math.log(100/11)/9,end:[9,11],lab:"fev/2024 ≈ 11%",ymax:100,yt:[[0,"0%",1],[25,"25%"],[50,"50%"],[75,"75%"],[100,"100%"]]},
+         s:{v0:18.88,k:Math.log(18.88)/11,end:[11,1],lab:"dez/2015 < 1%",ymax:20,yt:[[0,"0%",1],[5,"5%"],[10,"10%"],[15,"15%"],[20,"20%"]]}};
+  var cs="b",sl=document.getElementById("m2t"),seg=document.getElementById("m2-case"),xt=[];for(var i=0;i<=20;i+=2)xt.push([i,i+(i?"":" m")]);
+  function V(c,t){return c.v0*Math.exp(-c.k*t)}
+  var api=plot(document.getElementById("m2-plot"),{label:"Queda exponencial do volume útil do reservatório",W:620,H:290,m:{l:46,r:20,t:18,b:30},x:{min:0,max:20,ticks:xt},y:{min:0,max:100,ticks:C.b.yt},step:.1,kstep:.5,series:[],
+    tip:function(x){var c=C[cs];return{html:'<div class="th">Mês '+fmt(x,1)+'</div>'+tipRows([{n:"Volume",c:"#9a6a4c",v:fmt(V(c,x),1)+"%"}]),pts:[{y:V(c,x),c:"#9a6a4c"}]}},
+    onPick:function(v){sl.value=v;upd()}});
+  function upd(){var c=C[cs],t=+sl.value,th=Math.log(2)/c.k,pts=[];for(var x=0;x<=20.001;x+=.2)pts.push([x,V(c,x)]);
+    api.cfg.y={min:0,max:c.ymax,ticks:c.yt};api.cfg.series=[{id:"v",c:"#9a6a4c",w:2.5,pts:pts,end:false,area:true}];
+    api.cfg.refs=[{axis:"y",v:c.v0/2,label:"metade"},{axis:"y",v:c.v0/4,label:"um quarto"},{axis:"x",v:th,label:"t½ "+fmt(th,1),dy:10},{axis:"x",v:2*th,label:"2·t½",dy:10}];
+    api.cfg.marks=[{x:0,y:c.v0,c:"#02093a",fill:"#02093a",label:"início "+fmt(c.v0,c.v0%1?2:0).replace(/,00$/,"")+"%",dx:8,anchor:"start",dy:12},{x:c.end[0],y:c.end[1],c:"#02093a",fill:"#02093a",label:c.lab,dx:8,anchor:"start",dy:-10},{x:t,y:V(c,t),c:"#9a6a4c",fill:"#fff",r:6}];
+    document.getElementById("m2t-o").textContent=fmt(t,1);document.getElementById("m2-v").textContent=fmt(V(c,t),1)+"%";document.getElementById("m2-h").textContent=fmt(th,1)+" meses";api.render()}
+  sl.addEventListener("input",upd);
+  seg.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;cs=b.getAttribute("data-c");Array.prototype.forEach.call(seg.children,function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});upd()});
+  upd();
+})();
+
+/* ===== Missão 3 ===== */
+(function(){
+  var L=["MAM","AMJ","MJJ","JJA","JAS"];
+  var D={"1982":[.34,.65,.73,.78,.99],"1997":[.30,.71,1.13,1.48,1.79],"2015":[.86,1.04,1.19,1.44,1.73],"2023":[.19,.46,.73,1,1.25],"2026":[.46,.95,1.39,1.8,2.16]};
+  var ref=[0,1,2,3,4].map(function(i){return[i,.25*Math.pow(1.2,i)]});
+  var series=ORDER.map(function(id){return{id:id,n:id,c:COL[id],w:id==="2026"?3.5:2,pts:D[id].map(function(v,i){return[i,v]})}}).concat([{id:"ref",n:"×1,2/mês",c:"#9b9792",w:1.5,dash:"5 5",pts:ref,end:false}]);
+  var SC={log:{min:.15,max:2.6,log:true,ticks:[[.2,"0,2"],[.5,"0,5"],[1,"1"],[2,"2"]]},lin:{min:0,max:2.4,ticks:[[0,"0",1],[.5,"0,5"],[1,"1"],[1.5,"1,5"],[2,"2"]]}};
+  var api=plot(document.getElementById("m3-plot"),{label:"ONI de mar–mai a jul–set em escala logarítmica ou comum",x:{min:0,max:4,ticks:L.map(function(l,i){return[i,l]})},y:SC.log,snap:[0,1,2,3,4],m:{l:44,r:84,t:18,b:30},series:series,
+    tip:function(x,api){var i=Math.round(x),rows=[],pts=[];ORDER.forEach(function(id){if(api.hidden[id])return;var v=D[id][i];rows.push({n:id,c:COL[id],v:fmt(v,2)+(i?'  <span style="color:var(--mut);font-weight:400">×'+fmt(v/D[id][i-1],2)+"</span>":""),val:v});pts.push({y:v,c:COL[id]})});
+      rows.sort(function(a,b){return b.val-a.val});return{html:'<div class="th">'+L[i]+(i?" · fator vs "+L[i-1]:"")+"</div>"+tipRows(rows),pts:pts}}});
+  chips(document.getElementById("m3-chips"),ORDER,api);
+  var seg=document.getElementById("m3-scale");
+  seg.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;api.cfg.y=SC[b.getAttribute("data-s")];Array.prototype.forEach.call(seg.children,function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});api.render()});
+})();
+
+/* ===== Missão 4 ===== */
+(function(){
+  var bb=document.getElementById("bb"),bo=document.getElementById("bo");
+  function draw(){var b=+bb.value,o=+bo.value,m=Math.exp(b*o),pct=(m-1)*100;
+    document.getElementById("bb-o").textContent=sgn(b,2).replace(/^\+/,"");document.getElementById("bo-o").textContent=sgn(o,1);
+    document.getElementById("b-out").textContent="×"+fmt(m,2);
+    var w=Math.min(50,Math.abs(Math.log(m))/Math.log(2.5)*50),bar=document.getElementById("b-bar");
+    bar.style.background=pct>=0?"#097fe8":"#9a6a4c";bar.style.width=w+"%";bar.style.left=pct>=0?"50%":(50-w)+"%";
+    document.getElementById("b-txt").textContent=Math.abs(pct)<.5?"A vazão ficaria praticamente igual à média do mês.":"A vazão ficaria "+fmt(Math.abs(pct),0)+"% "+(pct>0?"acima":"abaixo")+" da média do mês (e^("+fmt(b,2)+" × "+fmt(o,1)+") = "+fmt(m,3)+")."}
+  bb.addEventListener("input",draw);bo.addEventListener("input",draw);draw();
 })();
 </script>
 <script>
-(function(){
-var h0=7.5,Q0=10942,b=Math.log(31025/10942)/(13.54-7.5);
-function f(n,d){return n.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})}
-var sl=document.getElementById("hh");
-function upd(){var h=parseFloat(sl.value),Q=Q0*Math.exp(b*(h-h0)),r=Q/Q0;
-document.getElementById("o-h").textContent=f(h,2)+" m";
-document.getElementById("o-q").textContent=f(Math.round(Q),0);
-document.getElementById("o-r").textContent=f(r,2)+"×";
-document.getElementById("o-d").textContent=f(Math.log2(r),2)}
-sl.addEventListener("input",upd);upd();
-
-var L=["MAM","AMJ","MJJ","JJA","JAS"];
-var S=[{n:"1982",c:"#8e8e93",v:[.34,.65,.73,.78,.99]},{n:"1997",c:"#bf5af2",v:[.30,.71,1.13,1.48,1.79],dy:-5},{n:"2015",c:"#ff9f0a",v:[.86,1.04,1.19,1.44,1.73],dy:10},{n:"2023",c:"#30b0c7",v:[.19,.46,.73,1,1.25]},{n:"2026",c:"#d1495b",v:[.46,.95,1.39,1.8,2.16],b:1}];
-var W=640,H=300,l=48,r=64,t=14,bm=30,lo=Math.log(.15),hi=Math.log(2.6);
-function x(i){return l+i*(W-l-r)/4}function y(v){return t+(hi-Math.log(v))*(H-t-bm)/(hi-lo)}
-var h="";
-[.2,.5,1,2].forEach(function(v){h+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="currentColor" opacity=".14"/><text x="'+(l-8)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="11" fill="currentColor" opacity=".65">'+f(v,1)+'</text>'});
-L.forEach(function(m,i){h+='<text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="currentColor" opacity=".65">'+m+'</text>'});
-var ref=[0,1,2,3,4].map(function(i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(.25*Math.pow(1.2,i)).toFixed(1)}).join("");
-h+='<path d="'+ref+'" fill="none" stroke="currentColor" stroke-dasharray="5 5" opacity=".45"/><text x="'+(x(4)+8)+'" y="'+(y(.25*Math.pow(1.2,4))+4)+'" font-size="11" fill="currentColor" opacity=".65">×1,2/mês</text>';
-S.forEach(function(s){var d=s.v.map(function(v,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)}).join("");
-h+='<path d="'+d+'" fill="none" stroke="'+s.c+'" stroke-width="'+(s.b?4:2)+'" stroke-linecap="round" stroke-linejoin="round"/>';
-h+='<circle cx="'+x(4)+'" cy="'+y(s.v[4])+'" r="'+(s.b?5:3.5)+'" fill="'+s.c+'"/><text x="'+(x(4)+10)+'" y="'+(y(s.v[4])+4+(s.dy||0))+'" font-size="12" font-weight="'+(s.b?700:500)+'" fill="'+s.c+'">'+s.n+'</text>'});
-var svg=document.getElementById("sl");svg.style.color=getComputedStyle(document.body).color;svg.innerHTML=h;
-})();
-</script><script>
+/* ===== Calculadora tutorial ===== */
 (function(){
 var G={dec:",",div:"÷",mul:"×",sub:"−",add:"+",pow:"^",lp:"(",rp:")",ln:"ln(",log:"log(",sqrt:"√(",sq:"²",eq:"",del:"",ac:"",shift:""};
 for(var d=0;d<10;d++)G[String(d)]=String(d);
 var LAY=[["shift","SHIFT","fn"],["lp","(","fn"],["rp",")","fn"],["del","DEL","fn"],["ac","AC","fn"],
-["log","log","", "10ˣ"],["ln","ln","","eˣ"],["pow","^","","xʸ"],["sqrt","√","fn"],["sq","x²","fn"],
+["log","log","","10ˣ"],["ln","ln","","eˣ"],["pow","^","","xʸ"],["sqrt","√","fn"],["sq","x²","fn"],
 ["7","7"],["8","8"],["9","9"],["div","÷","fn"],["mul","×","fn"],
 ["4","4"],["5","5"],["6","6"],["sub","−","fn"],["add","+","fn"],
 ["1","1"],["2","2"],["3","3"],["0","0"],["dec",","],
 ["eq","=","kEq"]];
 var N={"31025":["3","1","0","2","5"],"10942":["1","0","9","4","2"],"6,04":["6","dec","0","4"],"0,1725":["0","dec","1","7","2","5"],"1000":["1","0","0","0"]};
-function T(a){return a.split("")}
 var LS=[
-{t:"1 Potência",g:"Calcular 2³. Resultado: 8",n:"A tecla ^ (em alguns modelos xʸ) eleva a base ao expoente.",r:"8",
+{t:"1 · Potência",g:"Calcular 2³ = 8",n:"A tecla ^ (em alguns modelos xʸ) eleva a base ao expoente.",r:"8",
  s:[["Digite a base: 2",["2"]],["Aperte ^ (potência)",["pow"]],["Digite o expoente: 3",["3"]],["Aperte =",["eq"]]]},
-{t:"2 log",g:"Calcular log 1000. Resultado: 3",n:"O log da calculadora tem base 10. A pergunta é: 10 elevado a quanto dá 1000?",r:"3",
+{t:"2 · log",g:"Calcular log 1000 = 3",n:"O log da calculadora tem base 10. A pergunta é: 10 elevado a quanto dá 1000?",r:"3",
  s:[["Aperte log. A calculadora abre log(",["log"]],["Digite 1000",N["1000"]],["Feche o parêntese (em muitos modelos é opcional)",["rp"]],["Aperte =",["eq"]]]},
-{t:"3 ln",g:"Calcular ln 2. Resultado: 0,6931",n:"O ln é o log de base e. A pergunta é: e elevado a quanto dá 2?",r:"0,6931",
+{t:"3 · ln",g:"Calcular ln 2 = 0,6931",n:"O ln é o log de base e. A pergunta é: e elevado a quanto dá 2?",r:"0,6931",
  s:[["Aperte ln. A calculadora abre ln(",["ln"]],["Digite 2",["2"]],["Feche o parêntese",["rp"]],["Aperte =",["eq"]]]},
-{t:"4 eˣ",g:"Calcular e elevado a 0,1725. Resultado: 1,1883",n:"A tecla eˣ é a função amarela escrita em cima do ln. Primeiro SHIFT, depois ln.",r:"1,1883",
+{t:"4 · eˣ",g:"Calcular e^0,1725 = 1,1883",n:"A tecla eˣ é a função escrita em cima do ln. Primeiro SHIFT, depois ln.",r:"1,1883",
  s:[["Aperte SHIFT",["shift"]],["Aperte ln: com o SHIFT ele vira eˣ",["ln"]],["Digite 0,1725",N["0,1725"]],["Feche o parêntese",["rp"]],["Aperte =",["eq"]]]},
-{t:"5 Conta completa",g:"Calcular ln(31025 ÷ 10942) ÷ 6,04. Resultado: 0,1725",n:"Tudo o que está dentro do ln fica entre parênteses. Depois do ) a conta segue normalmente. A calculadora mostra mais casas; aqui arredondamos.",r:"0,1725",
+{t:"5 · Conta completa",g:"ln(31025 ÷ 10942) ÷ 6,04 = 0,1725",n:"Tudo o que está dentro do ln fica entre parênteses. Depois do ) a conta segue normalmente.",r:"0,1725",
  s:[["Aperte ln",["ln"]],["Digite 31025",N["31025"]],["Aperte ÷",["div"]],["Digite 10942",N["10942"]],["Feche o parêntese: aqui o ln termina",["rp"]],["Aperte ÷",["div"]],["Digite 6,04",N["6,04"]],["Aperte =",["eq"]]]},
-{t:"6 Erro",g:"Ver o que acontece com ln(−3)",n:"O logaritmo só existe para números maiores que zero. Com zero ou número negativo, a calculadora mostra erro.",r:"Math ERROR",
+{t:"6 · Erro",g:"O que acontece com ln(−3)?",n:"O logaritmo só existe para números maiores que zero. Com zero ou número negativo, a calculadora mostra erro.",r:"Math ERROR",
  s:[["Aperte ln",["ln"]],["Aperte − (menos)",["sub"]],["Digite 3",["3"]],["Feche o parêntese",["rp"]],["Aperte =",["eq"]]]}
 ];
 var $=function(i){return document.getElementById(i)};
@@ -465,4 +1064,6 @@ $("creset").addEventListener("click",function(){stop();kpos=0;$("chint").textCon
 load(0);
 })();
 </script>
-</body></html>
+
+</body>
+</html>
